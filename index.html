@@ -38,7 +38,7 @@
     <div class="step">
         <h3>Bước 1 & 2 - Nạp hệ sinh thái Font (.ttf, .otf, .woff, .zip)</h3>
         <input type="file" id="tep_font_goc" accept=".ttf,.otf,.woff,.zip">
-        <div class="note">* Lưu ý: Định dạng .woff2 hiện chưa được hỗ trợ bởi nhân lõi phân tích.</div>
+        <div class="note">* Lưu ý: Định dạng .woff2 hiện chưa được hỗ trợ bởi nhân lõi phân tích. Giới hạn ZIP dưới 50MB.</div>
         
         <div id="vung_chon_style" style="display: none; margin-top: 15px;">
             <label>Phát hiện kiểu chữ! Chọn Style bạn muốn dùng:</label>
@@ -114,7 +114,6 @@
         });
     });
 
-    // Hàm an toàn trích xuất tên Font (VÁ LỖI 2: Tránh crash khi gặp font thiếu thuộc tính .en)
     function lay_ten_font_an_toan(font_obj) {
         const ten_goc = font_obj.names.fontFamily?.en || Object.values(font_obj.names.fontFamily || {})[0] || "UnknownFont";
         const kieu_goc = font_obj.names.fontSubfamily?.en || Object.values(font_obj.names.fontSubfamily || {})[0] || "Regular";
@@ -125,6 +124,14 @@
         const file = e.target.files[0];
         if (!file) return;
         
+        // VÁ LỖI 2: Phòng chống Zip Bomb, file nén rác dung lượng khủng làm crash tab
+        if (file.name.toLowerCase().endsWith('.zip') && file.size > 50 * 1024 * 1024) {
+            document.getElementById('trang_thai_he_thong').innerText = "Hủy bỏ: Tệp ZIP vượt giới hạn an toàn (50MB).";
+            alert("Tệp ZIP quá lớn! Vui lòng sử dụng tệp có dung lượng nhỏ hơn 50MB để đảm bảo an toàn hệ thống.");
+            e.target.value = ""; 
+            return;
+        }
+
         kho_font_da_tai = {};
         const ui_chon_kieu = document.getElementById('chon_kieu_font');
         ui_chon_kieu.innerHTML = '';
@@ -132,20 +139,33 @@
         document.getElementById('trang_thai_he_thong').innerText = "Đang phân tích định dạng tệp...";
 
         if (file.name.toLowerCase().endsWith('.zip')) {
-            const zip = await JSZip.loadAsync(file);
-            for (let filename in zip.files) {
-                if (filename.match(/\.(ttf|otf|woff)$/i)) {
-                    const buffer = await zip.files[filename].async("arraybuffer");
-                    try {
-                        const font_parse = opentype.parse(buffer);
-                        const ten_font = lay_ten_font_an_toan(font_parse);
-                        kho_font_da_tai[ten_font] = font_parse;
-                        ui_chon_kieu.innerHTML += `<option value="${ten_font}">${ten_font}</option>`;
-                    } catch(err) { console.log("Bỏ qua file lỗi/không hỗ trợ:", filename); }
+            try {
+                const zip = await JSZip.loadAsync(file);
+                for (let filename in zip.files) {
+                    if (filename.match(/\.(ttf|otf|woff)$/i)) {
+                        const buffer = await zip.files[filename].async("arraybuffer");
+                        try {
+                            const font_parse = opentype.parse(buffer);
+                            const ten_font = lay_ten_font_an_toan(font_parse);
+                            kho_font_da_tai[ten_font] = font_parse;
+                            
+                            // VÁ LỖI 1: Thay thế triệt để innerHTML bằng textContent phòng độc XSS qua Metadata Font
+                            const option = document.createElement('option');
+                            option.value = ten_font;
+                            option.textContent = ten_font;
+                            ui_chon_kieu.appendChild(option);
+                        } catch(err) { console.log("Bỏ qua file lỗi/không hỗ trợ:", filename); }
+                    }
                 }
+                if(Object.keys(kho_font_da_tai).length === 0) {
+                    throw new Error("Không tìm thấy file font hợp lệ bên trong ZIP!");
+                }
+                document.getElementById('vung_chon_style').style.display = 'block';
+                document.getElementById('trang_thai_he_thong').innerText = `Phân tích ZIP thành công! Đã tìm thấy ${Object.keys(kho_font_da_tai).length} kiểu chữ.`;
+            } catch(zipErr) {
+                document.getElementById('trang_thai_he_thong').innerText = "Lỗi đọc tệp ZIP.";
+                alert("Không thể đọc file ZIP hoặc file cấu trúc bị hỏng: " + zipErr.message);
             }
-            document.getElementById('vung_chon_style').style.display = 'block';
-            document.getElementById('trang_thai_he_thong').innerText = `Phân tích ZIP thành công! Đã tìm thấy ${Object.keys(kho_font_da_tai).length} kiểu chữ.`;
         } else {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -153,7 +173,13 @@
                     const font_parse = opentype.parse(e.target.result);
                     const ten_font = lay_ten_font_an_toan(font_parse);
                     kho_font_da_tai[ten_font] = font_parse;
-                    ui_chon_kieu.innerHTML += `<option value="${ten_font}">${ten_font}</option>`;
+
+                    // VÁ LỖI 1: Ép kiểu textContent an toàn tuyệt đối
+                    const option = document.createElement('option');
+                    option.value = ten_font;
+                    option.textContent = ten_font;
+                    ui_chon_kieu.appendChild(option);
+
                     document.getElementById('vung_chon_style').style.display = 'block';
                     document.getElementById('trang_thai_he_thong').innerText = "Đã nạp Font hệ thống thành công!";
                 } catch(err) { alert("Lỗi đọc file font: Định dạng có thể không được hỗ trợ (VD: woff2)"); }
@@ -165,7 +191,6 @@
     const bo_loc_ten_sheep = { "/": "slash", "\\": "backslash", ":": "colon", "*": "asterisk", "?": "question", '"': "quote", "<": "less_than", ">": "greater_than", "|": "pipe", " ": "space", "\n": "newline", "\t": "tab", ".": "dot" };
 
     async function bat_dau_xu_ly(kieu_xuat) {
-        // VÁ LỖI 4: Bao bọc toàn bộ phase xuất bản bằng Try/Catch lớn tránh chết ngầm ứng dụng
         try {
             const ten_kieu_da_chon = document.getElementById('chon_kieu_font').value;
             const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
@@ -198,7 +223,6 @@
             for (let ky_tu of mang_ky_tu_duy_nhat) {
                 const glyph = font_hoat_dong.charToGlyph(ky_tu);
                 
-                // VÁ LỖI 3: Fallback an toàn cho advanceWidth nếu gặp glyph dị
                 const do_rong_goc = glyph.advanceWidth !== undefined ? glyph.advanceWidth : font_hoat_dong.unitsPerEm;
                 const do_rong_ngang = do_rong_goc * ti_le_scale;
                 
@@ -211,7 +235,6 @@
                 const svgPathData = path.toPathData(2);
                 if (!svgPathData) continue;
 
-                // VÁ LỖI 5: Xóa bỏ thuộc tính stroke thừa thãi, chỉ giữ fill để file vector nhẹ và mượt nhất
                 const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${do_rong_ngang}" height="${chieu_cao_an_toan}" viewBox="0 0 ${do_rong_ngang} ${chieu_cao_an_toan}">
                     <path d="${svgPathData}" fill="${mau_chu}"/>
                 </svg>`;
@@ -289,8 +312,4 @@
         the_a.href = url;
         the_a.download = filename;
         the_a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
-</script>
-</body>
-</html>
+        setTimeout(() =>
