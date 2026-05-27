@@ -162,7 +162,7 @@
         </div>
 
         <div class="preview-box">
-            <div id="vung_hien_thi_preview" class="preview-text">Bica Studio</div>
+            <canvas id="preview_canvas" width="800" height="200" style="background:#111; border-radius:8px;"></canvas>
         </div>
     </div>
 
@@ -359,39 +359,55 @@
         kich_hoat_preview();
     }
     function kich_hoat_preview() {
-        const vung_view = document.getElementById('vung_hien_thi_preview');
-        const chuoi_test = document.getElementById('chuoi_preview').value || " ";
+        const canvas = document.getElementById('preview_canvas');
+        const ctx = canvas.getContext('2d');
+        const chuoi_test = document.getElementById('chuoi_preview').value || "Preview";
         
-        const mau_chu = document.getElementById('mau_chu').value.trim();
-        const mau_vien = document.getElementById('mau_vien').value.trim();
-        
-        // --- CHỖ CẦN BỌC LIMIT ---
+        // Lấy và giới hạn giá trị
+        const size_chu = Math.min(Math.max(parseInt(document.getElementById('kich_thuoc_chu').value) || 64, 4), 512);
         const do_day_vien = Math.min(Math.max(parseFloat(document.getElementById('do_day_vien').value) || 0, 0), 15);
         const do_day_weight = Math.min(Math.max(parseFloat(document.getElementById('do_day_weight').value) || 0, 0), 10);
         const ti_le_width = Math.min(Math.max(parseFloat(document.getElementById('ti_le_width').value) || 1.0, 0.3), 3.0);
-        const size_chu = Math.min(Math.max(parseInt(document.getElementById('kich_thuoc_chu').value) || 64, 4), 512);
-
-        vung_view.textContent = chuoi_test;
-        vung_view.style.fontFamily = url_font_preview ? "'DynamicBicaFont', sans-serif" : "sans-serif";
-        vung_view.style.color = mau_chu;
-        vung_view.style.fontSize = `${size_chu}px`;
-
-        let text_shadow_or_stroke = '';
-        if (mau_vien.toLowerCase() !== 'none' && do_day_vien > 0) {
-            text_shadow_or_stroke = `-${do_day_vien}px -${do_day_vien}px 0 ${mau_vien}, ${do_day_vien}px -${do_day_vien}px 0 ${mau_vien}, -${do_day_vien}px ${do_day_vien}px 0 ${mau_vien}, ${do_day_vien}px ${do_day_vien}px 0 ${mau_vien}`;
-        }
-        vung_view.style.textShadow = text_shadow_or_stroke;
         
-        if (do_day_weight > 0) {
-            vung_view.style.webkitTextStroke = `${do_day_weight}px ${mau_chu}`;
-        } else {
-            vung_view.style.webkitTextStroke = 'unset';
+        const mau_chu = document.getElementById('mau_chu').value;
+        const mau_vien = document.getElementById('mau_vien').value;
+    
+        // Reset Canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Lấy font đang active
+        const ten_font = document.getElementById('chon_kieu_font').value;
+        const font = kho_font_da_tai[ten_font];
+        if (!font) return;
+    
+        // Thiết lập vẽ
+        ctx.save();
+        ctx.scale(ti_le_width, 1); // Áp dụng scaleWidth
+        
+        // Tạo path từ font
+        const path = font.getPath(chuoi_test, 20, 120, size_chu);
+        
+        // Vẽ Viền (nếu có)
+        if (mau_vien !== 'none' && do_day_vien > 0) {
+            ctx.strokeStyle = mau_vien;
+            ctx.lineWidth = do_day_vien * 2; // Nhân đôi để khớp với logic vẽ viền SVG
+            ctx.lineJoin = 'round';
+            path.draw(ctx);
+            ctx.stroke();
         }
-
-        vung_view.style.transform = `scaleX(${ti_le_width})`;
-        vung_view.style.display = 'inline-block';
+        
+        // Vẽ Chữ (Fill)
+        ctx.fillStyle = mau_chu;
+        if (do_day_weight > 0) {
+            ctx.strokeStyle = mau_chu;
+            ctx.lineWidth = do_day_weight;
+            ctx.stroke();
+        }
+        path.draw(ctx);
+        ctx.fill();
+        
+        ctx.restore();
     }
-
     function xuat_danh_sach_do_rong() {
         try {
             const ten_kieu_da_chon = document.getElementById('chon_kieu_font').value;
