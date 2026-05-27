@@ -3,117 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bica Font Packer</title>
+    <title>Bica Font Packer Studio</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #1e1e24; color: #f5f5f7; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: #2a2a35; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-        h1 { text-align: center; color: #ff4757; margin-bottom: 20px; font-weight: 600; }
-        .step { background: #323242; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #ff4757; }
-        .step h3 { margin-top: 0; color: #ff6b81; }
-        input[type="text"], input[type="number"], textarea, input[type="file"], select { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; }
-        textarea { height: 100px; resize: vertical; }
-        .row { display: flex; gap: 15px; margin-top: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #18181c; color: #f5f5f7; margin: 0; padding: 20px; }
+        .container { max-width: 950px; margin: 0 auto; background: #22222b; padding: 25px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { text-align: center; color: #ff4757; margin-bottom: 25px; font-weight: 700; letter-spacing: 1px; }
+        .step { background: #2a2a35; padding: 18px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #ff4757; }
+        .step h3 { margin-top: 0; color: #ff6b81; display: flex; justify-content: space-between; align-items: center; }
+        label { font-size: 14px; font-weight: 600; color: #ddd; display: block; margin-top: 10px; }
+        input[type="text"], input[type="number"], textarea, input[type="file"], select { width: 100%; padding: 10px; margin-top: 6px; box-sizing: border-box; border-radius: 6px; border: 1px solid #444; background: #1a1a22; color: #fff; font-size: 14px; }
+        textarea { height: 80px; resize: vertical; }
+        .row { display: flex; gap: 15px; margin-top: 5px; }
         .row > div { flex: 1; }
-        .radio-group { background: #2a2a35; padding: 12px; border-radius: 6px; margin-top: 10px; }
+        .color-picker-wrapper { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+        input[type="color"] { width: 45px; height: 38px; border: 1px solid #444; background: none; border-radius: 6px; cursor: pointer; padding: 0; }
+        .radio-group { background: #1a1a22; padding: 12px; border-radius: 6px; margin-top: 8px; }
         .radio-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
         .radio-item:last-child { margin-bottom: 0; }
         .radio-item input { width: 18px; height: 18px; cursor: pointer; }
-        .radio-item label { cursor: pointer; font-size: 14px; }
-        button { background: #ff4757; color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 10px; font-size: 16px; transition: 0.2s; }
+        button { background: #ff4757; color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 12px; font-size: 15px; transition: 0.2s; }
         button:hover { background: #ff6b81; }
         .btn-secondary { background: #2ed573; }
         .btn-secondary:hover { background: #2ecc71; }
-        .status { margin-top: 15px; padding: 10px; border-radius: 6px; background: #222; font-size: 14px; color: #eccc68; text-align: center; }
-        .note { font-size: 12px; color: #aaa; margin-top: 5px; font-style: italic; }
-        .output-box { background: #111; color: #2ed573; font-family: monospace; height: 150px; margin-top: 10px; }
+        .btn-dark { background: #4b6584; }
+        .btn-dark:hover { background: #778ca3; }
+        .status { margin-top: 15px; padding: 12px; border-radius: 6px; background: #111; font-size: 14px; color: #eccc68; text-align: center; font-weight: bold; }
+        
+        /* Bảng ký tự Character Map */
+        .char-map-container { background: #1a1a22; border: 1px solid #444; border-radius: 6px; height: 120px; overflow-y: auto; padding: 10px; margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 6px; }
+        .char-item { background: #2a2a35; text-align: center; padding: 5px 0; border-radius: 4px; cursor: pointer; user-select: none; font-size: 16px; border: 1px solid transparent; transition: 0.1s; }
+        .char-item:hover { background: #ff4757; color: white; border-color: #ff6b81; }
+        
+        /* Khung nhóm nút bấm chữ mẫu nhanh */
+        .preset-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .btn-preset-text { background: #3c3c4e; color: #fff; padding: 6px 12px; font-size: 12px; border-radius: 4px; width: auto; margin-top: 0; font-weight: normal; border: 1px solid #555; }
+        .btn-preset-text:hover { background: #4e4e66; }
+
+        /* Khung xem trước Preview */
+        .preview-box { background: #111; border: 2px dashed #ff4757; border-radius: 8px; padding: 15px; margin-top: 10px; min-height: 80px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-align: center; word-break: break-all; }
+        .preview-text { font-size: 40px; line-height: 1.2; color: #fff; }
+        .output-box { background: #111; color: #2ed573; font-family: monospace; height: 120px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Bica Font Packer</h1>
+    <h1>Bica Font Packer Studio V4.1</h1>
 
     <div class="step">
         <h3>Bước 1 - Nạp tệp tin Font (.ttf, .otf, .woff, .zip)</h3>
         <input type="file" id="tep_font_goc" accept=".ttf,.otf,.woff,.zip">
-        <div class="note">* Lưu ý: Định dạng .woff2 hiện chưa được hỗ trợ. Giới hạn ZIP dưới 50MB.</div>
         
         <div id="vung_chon_style" style="display: none; margin-top: 15px;">
-            <label>Chọn kiểu Font muốn sử dụng:</label>
-            <select id="chon_kieu_font"></select>
+            <label>Chọn kiểu Font hoạt động:</label>
+            <select id="chon_kieu_font" onchange="cap_nhat_font_hoat_dong()"></select>
         </div>
     </div>
 
     <div class="step">
-        <h3>Bước 2 - Tùy chỉnh Thuật toán & Thông số</h3>
-        <label>Danh sách ký tự (Hỗ trợ nhập tự do):</label>
-        <textarea id="danh_sach_ky_tu">abcdefghijklmnopqrstuvwxyz!#$%"&'()*+,-./0123456789:;<=>?@[\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZ</textarea>
+        <h3>Bước 2 - Quản lý danh sách ký tự đóng gói</h3>
         
         <div class="row">
             <div>
-                <label>Màu sắc nét chữ (HEX):</label>
-                <input type="text" id="mau_chu" value="#ff0000" placeholder="Ví dụ: #ff0000">
-            </div>
-            <div>
-                <label>Kích thước chữ (Size 4 - 512):</label>
-                <input type="number" id="kich_thuoc_chu" value="64" min="4" max="512">
+                <label>Cách 1: Chọn nhanh bảng chữ cái ngôn ngữ:</label>
+                <select id="preset_ngon_ngu" onchange="doi_preset_ngon_ngu()">
+                    <option value="latin">Tiếng Anh / Latinh Cơ Bản</option>
+                    <option value="vietnamese" selected>Tiếng Việt (Đầy đủ dấu)</option>
+                    <option value="korean">Tiếng Hàn Quốc (Hangul cơ bản)</option>
+                    <option value="japanese">Tiếng Nhật Bản (Kana)</option>
+                </select>
             </div>
         </div>
 
-        <label style="display:block; margin-top:12px; font-weight:bold;">Chế độ căn chữ:</label>
+        <label style="color: #2ed573; margin-top: 12px;">Cách 2: Dán văn bản/Lời thoại game mẫu (Tự lọc ký tự duy nhất để tối ưu RAM):</label>
+        <textarea id="van_ban_goc_mau" placeholder="Dán đoạn văn, lời thoại game, hoặc câu bất kỳ vào đây... Hệ thống sẽ tự lọc ra danh sách chữ cái duy nhất để tạo costume!" oninput="loc_ky_tu_tu_van_ban_mau()"></textarea>
+
+        <label style="margin-top:12px;">Bảng ký tự có sẵn trong Font (Click để chèn nhanh):</label>
+        <div class="char-map-container" id="char_map_visualizer">
+            <div style="color: #aaa; grid-column: 1/-1; text-align: center; font-style: italic; padding-top: 35px;">Hãy nạp Font để hiển thị bản đồ ký tự...</div>
+        </div>
+
+        <label style="margin-top:12px; font-weight: bold; color: #ff6b81;">Chuỗi ký tự cuối cùng sẽ xuất bản:</label>
+        <textarea id="danh_sach_ky_tu" oninput="kich_hoat_preview()">abcdefghijklmnopqrstuvwxyz!#$%"&'()*+,-./0123456789:;<=>?@[\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ</textarea>
+    </div>
+
+    <div class="step">
+        <h3>Bước 3 - Tùy biến Style & Kiểu dáng nét chữ</h3>
+        <div class="row">
+            <div>
+                <label>Màu sắc chữ:</label>
+                <div class="color-picker-wrapper">
+                    <input type="text" id="mau_chu" value="#ffffff" oninput="dong_bo_mau('mau_chu', 'picker_mau_chu')">
+                    <input type="color" id="picker_mau_chu" value="#ffffff" oninput="dong_bo_mau('picker_mau_chu', 'mau_chu')">
+                </div>
+            </div>
+            <div>
+                <label>Màu viền chữ ('none' nếu ko viền):</label>
+                <div class="color-picker-wrapper">
+                    <input type="text" id="mau_vien" value="none" oninput="dong_bo_mau('mau_vien', 'picker_mau_vien')">
+                    <input type="color" id="picker_mau_vien" value="#ff4757" oninput="dong_bo_mau('picker_mau_vien', 'mau_vien')">
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 10px;">
+            <div>
+                <label>Kích thước chữ (Size 4 - 512):</label>
+                <input type="number" id="kich_thuoc_chu" value="64" min="4" max="512" oninput="kich_hoat_preview()">
+            </div>
+            <div>
+                <label>Độ dày viền ngoài (0 - 15):</label>
+                <input type="number" id="do_day_vien" value="0" min="0" max="15" oninput="kich_hoat_preview()">
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 10px;">
+            <div>
+                <label>Độ béo nét chữ (Weight phụ: 0 - 10):</label>
+                <input type="number" id="do_day_weight" value="0" min="0" max="10" step="0.5" oninput="kich_hoat_preview()">
+            </div>
+            <div>
+                <label>Tỉ lệ rộng chữ (Width scale: 0.3 - 3.0):</label>
+                <input type="number" id="ti_le_width" value="1.0" min="0.3" max="3.0" step="0.1" oninput="kich_hoat_preview()">
+            </div>
+        </div>
+
+        <label style="display:block; margin-top:12px; font-weight:bold;">Chế độ căn tâm tọa độ:</label>
         <div class="radio-group">
             <div class="radio-item">
-                <input type="radio" id="align_baseline" name="loai_can_tam" value="baseline" checked>
+                <input type="radio" id="align_baseline" name="loai_can_tam" value="baseline" checked align onchange="kich_hoat_preview()">
                 <label for="align_baseline">Căn theo dòng chữ (Baseline)</label>
             </div>
             <div class="radio-item">
-                <input type="radio" id="align_center" name="loai_can_tam" value="center">
+                <input type="radio" id="align_center" name="loai_can_tam" value="center" onchange="kich_hoat_preview()">
                 <label for="align_center">Căn giữa hình chữ (Trung tâm nét chữ)</label>
             </div>
             <div class="radio-item">
-                <input type="radio" id="align_default" name="loai_can_tam" value="default">
+                <input type="radio" id="align_default" name="loai_can_tam" value="default" onchange="kich_hoat_preview()">
                 <label for="align_default">Căn giữa khung (Mặc định)</label>
             </div>
         </div>
     </div>
 
     <div class="step">
-        <h3>Bước 3 - Chọn Chế Độ Đóng Gói .Sprite3</h3>
+        <h3>Bước 4 - Khung xem trước thời gian thực (Live Preview)</h3>
+        <label>Nhập chuỗi test hiển thị thử:</label>
+        <input type="text" id="chuoi_preview" value="Bica Studio V4.1" oninput="kich_hoat_preview()">
+        
+        <div class="preset-buttons">
+            <button class="btn-preset-text" onclick="nap_chu_mau_preview('Bica Studio V4.1')">Mặc định</button>
+            <button class="btn-preset-text" onclick="nap_chu_mau_preview('0123456789 !@#$%^&*()')">Chữ số & Ký tự</button>
+            <button class="btn-preset-text" onclick="nap_chu_mau_preview('Form dáng chữ Đầy Đủ Dấu Tiếng Việt')">Tiếng Việt Dấu</button>
+            <button class="btn-preset-text" onclick="nap_chu_mau_preview('The quick brown fox jumps over the lazy dog')">English Pangram</button>
+            <button class="btn-preset-text" onclick="nap_chu_mau_preview('안녕하세요! 감사합니다. 대박!')">Korean Test</button>
+        </div>
+
+        <div class="preview-box">
+            <div id="vung_hien_thi_preview" class="preview-text">Bica Studio V4.1</div>
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>Bước 5 - Xuất bản sản phẩm</h3>
         <div class="radio-group">
             <div class="radio-item">
                 <input type="radio" id="che_do_tao_moi" name="che_do" value="new" checked>
-                <label for="che_do_tao_moi" style="font-weight:bold;">Tạo mới tệp .Sprite3 hoàn toàn</label>
+                <label for="che_do_tao_moi" style="font-weight:bold;">Tạo mới tệp .Sprite3</label>
             </div>
             <div class="radio-item">
                 <input type="radio" id="che_do_sua" name="che_do" value="modify">
-                <label for="che_do_sua" style="font-weight:bold;">Sửa đổi / Nối thêm vào file .Sprite3 có sẵn</label>
+                <label for="che_do_sua" style="font-weight:bold;">Sửa đổi / Nối đuôi file .Sprite3 có sẵn</label>
             </div>
         </div>
         <div id="vung_chon_sprite" style="display: none; margin-top: 10px;">
             <label>Nạp tệp .sprite3 gốc cần bổ sung:</label>
             <input type="file" id="tep_sprite_goc" accept=".sprite3">
         </div>
-    </div>
 
-    <div class="step">
-        <h3>Bước 4 - Xuất Bản</h3>
-        <button onclick="xuat_danh_sach_do_rong()" class="btn-secondary">1. Xuất danh sách Độ rộng chữ (Dạng Văn Bản)</button>
-        <button onclick="bat_dau_xu_ly_sprite()" style="margin-top: 12px;">2. Đóng Gói & Tải Về .Sprite3</button>
+        <div class="row" style="margin-top: 15px;">
+            <div>
+                <button onclick="xuat_danh_sach_do_rong()" class="btn-secondary">1. Xuất danh sách độ rộng</button>
+            </div>
+            <div>
+                <button onclick="bat_dau_xu_ly_sprite()">2. Tải về .Sprite3</button>
+            </div>
+        </div>
+        <button onclick="tao_sprite3_trong()" class="btn-dark">🔧 Tạo & Tải về file .Sprite3 TRỐNG hoàn toàn</button>
 
         <div id="vung_ket_qua_text" style="display:none; margin-top:15px;">
-            <label style="font-weight:bold; color:#2ed573;">Dữ liệu danh sách độ rộng (Nhấn Ctrl+A rồi Copy):</label>
+            <label style="font-weight:bold; color:#2ed573;">Dữ liệu ma trận độ rộng ngang:</label>
             <textarea id="ket_qua_do_rong" class="output-box" readonly></textarea>
         </div>
     </div>
 
-    <div class="status" id="trang_thai_he_thong">Hệ thống sẵn sàng! Đợi nạp font...</div>
+    <div class="status" id="trang_thai_he_thong">Hệ thống đã cập nhật bản tối ưu 4.1!</div>
 </div>
 
 <script>
     let kho_font_da_tai = {};
+    let url_font_preview = null;
+
+    const kho_ngon_ngu_mau = {
+        latin: "abcdefghijklmnopqrstuvwxyz!#$%\n\"&'()*+,-./0123456789:;<=>?@[\\\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        vietnamese: "abcdefghijklmnopqrstuvwxyz!#$%\n\"&'()*+,-./0123456789:;<=>?@[\\\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ",
+        korean: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ가나다라마바사아자차카타파하안녕하세요감사합니다대박",
+        japanese: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむメモヤユヨラリルレロ"
+    };
+
+    function doi_preset_ngon_ngu() {
+        const loai = document.getElementById('preset_ngon_ngu').value;
+        if (kho_ngon_ngu_mau[loai]) {
+            document.getElementById('van_ban_goc_mau').value = ''; // Reset văn bản mẫu
+            document.getElementById('danh_sach_ky_tu').value = kho_ngon_ngu_mau[loai];
+            kich_hoat_preview();
+        }
+    }
+
+    // MỚI: Hàm lọc ký tự duy nhất từ đoạn văn bản bất kỳ
+    function loc_ky_tu_tu_van_ban_mau() {
+        const van_ban = document.getElementById('van_ban_goc_mau').value;
+        if(!van_ban) return;
+        
+        // Loại bỏ các ký tự điều khiển xuống dòng, giữ lại các ký tự hiển thị được, lọc trùng bằng Set
+        const chuoi_sach = van_ban.replace(/[\r\n\t]/g, '');
+        const mang_duy_nhat = [...new Set(chuoi_sach.split(''))];
+        
+        document.getElementById('danh_sach_ky_tu').value = mang_duy_nhat.join('');
+        kich_hoat_preview();
+    }
+
+    // MỚI: Nạp chuỗi test nhanh cho Live Preview
+    function nap_chu_mau_preview(chuoi) {
+        document.getElementById('chuoi_preview').value = chuoi;
+        kich_hoat_preview();
+    }
+
+    function dong_bo_mau(nguon_id, dich_id) {
+        const gia_tri = document.getElementById(nguon_id).value;
+        if (nguon_id.includes('picker') || /^#([0-9A-F]{3}){1,2}$/i.test(gia_tri) || gia_tri.toLowerCase() === 'none') {
+            document.getElementById(dich_id).value = gia_tri;
+            kich_hoat_preview();
+        }
+    }
 
     document.getElementsByName('che_do').forEach(radio => {
         radio.addEventListener('change', (e) => {
@@ -131,17 +265,10 @@
         const file = e.target.files[0];
         if (!file) return;
         
-        if (file.name.toLowerCase().endsWith('.zip') && file.size > 50 * 1024 * 1024) {
-            document.getElementById('trang_thai_he_thong').innerText = "Hủy bỏ: Tệp ZIP vượt giới hạn an toàn (50MB).";
-            alert("Tệp ZIP quá lớn! Vui lòng sử dụng tệp có dung lượng nhỏ hơn 50MB.");
-            e.target.value = ""; 
-            return;
-        }
-
         kho_font_da_tai = {};
         const ui_chon_kieu = document.getElementById('chon_kieu_font');
         ui_chon_kieu.innerHTML = '';
-        document.getElementById('trang_thai_he_thong').innerText = "Đang phân tích định dạng tệp...";
+        document.getElementById('trang_thai_he_thong').innerText = "Đang xử lý cấu trúc nhị phân Font...";
 
         if (file.name.toLowerCase().endsWith('.zip')) {
             try {
@@ -149,60 +276,120 @@
                 for (let filename in zip.files) {
                     if (filename.match(/\.(ttf|otf|woff)$/i)) {
                         const buffer = await zip.files[filename].async("arraybuffer");
-                        try {
-                            const font_parse = opentype.parse(buffer);
-                            
-                            // VÁ LỖI 2: Chống ghi đè font trùng tên trong file ZIP
-                            let ten_font_goc = lay_ten_font_an_toan(font_parse);
-                            let ten_font = ten_font_goc;
-                            let dem = 1;
-                            while (kho_font_da_tai[ten_font]) {
-                                ten_font = `${ten_font_goc} (${dem++})`;
-                            }
-                            
-                            kho_font_da_tai[ten_font] = font_parse;
-                            
-                            const option = document.createElement('option');
-                            option.value = ten_font;
-                            option.textContent = ten_font;
-                            ui_chon_kieu.appendChild(option);
-                        } catch(err) { console.log("Bỏ qua file lỗi hoặc malformed:", filename); }
+                        nap_font_tu_buffer(buffer);
                     }
                 }
-                if(Object.keys(kho_font_da_tai).length === 0) throw new Error("Không tìm thấy file font hợp lệ bên trong tệp ZIP!");
-                document.getElementById('vung_chon_style').style.display = 'block';
-                document.getElementById('trang_thai_he_thong').innerText = `Tìm thấy ${Object.keys(kho_font_da_tai).length} kiểu chữ.`;
-            } catch(zipErr) {
-                alert("Lỗi đọc file ZIP: " + zipErr.message);
-            }
+                dung_bo_giao_dien_sau_tai();
+            } catch(zipErr) { alert("Lỗi đọc file ZIP: " + zipErr.message); }
         } else {
             const reader = new FileReader();
             reader.onload = function(e) {
-                try {
-                    const font_parse = opentype.parse(e.target.result);
-                    
-                    // VÁ LỖI 2 (Single): Chống ghi đè khi nạp liên tục tệp đơn trùng tên
-                    let ten_font_goc = lay_ten_font_an_toan(font_parse);
-                    let ten_font = ten_font_goc;
-                    let dem = 1;
-                    while (kho_font_da_tai[ten_font]) {
-                        ten_font = `${ten_font_goc} (${dem++})`;
-                    }
+                nap_font_tu_buffer(e.target.result);
+                if(url_font_preview) URL.revokeObjectURL(url_font_preview);
+                const blob = new Blob([e.target.result], {type: 'font/ttf'});
+                url_font_preview = URL.createObjectURL(blob);
+                
+                let style_preview = document.getElementById('id_font_preview_style');
+                if(!style_preview) {
+                    style_preview = document.createElement('style');
+                    style_preview.id = 'id_font_preview_style';
+                    document.head.appendChild(style_preview);
+                }
+                style_preview.innerHTML = `@font-face { font-family: 'DynamicBicaFont'; src: url('${url_font_preview}'); }`;
 
-                    kho_font_da_tai[ten_font] = font_parse;
-
-                    const option = document.createElement('option');
-                    option.value = ten_font;
-                    option.textContent = ten_font;
-                    ui_chon_kieu.appendChild(option);
-
-                    document.getElementById('vung_chon_style').style.display = 'block';
-                    document.getElementById('trang_thai_he_thong').innerText = "Đã nạp Font thành công!";
-                } catch(err) { alert("Lỗi: Định dạng font không được hỗ trợ hoặc file bị hỏng."); }
+                dung_bo_giao_dien_sau_tai();
             };
             reader.readAsArrayBuffer(file);
         }
     });
+
+    function nap_font_tu_buffer(buffer) {
+        try {
+            const font_parse = opentype.parse(buffer);
+            let ten_font_goc = lay_ten_font_an_toan(font_parse);
+            let ten_font = ten_font_goc;
+            let dem = 1;
+            while (kho_font_da_tai[ten_font]) { ten_font = `${ten_font_goc} (${dem++})`; }
+            kho_font_da_tai[ten_font] = font_parse;
+        } catch(e) { console.log("Bỏ qua tệp hỏng."); }
+    }
+
+    function dung_bo_giao_dien_sau_tai() {
+        const ui_chon_kieu = document.getElementById('chon_kieu_font');
+        ui_chon_kieu.innerHTML = '';
+        for(let ten in kho_font_da_tai) {
+            const option = document.createElement('option');
+            option.value = ten; option.textContent = ten;
+            ui_chon_kieu.appendChild(option);
+        }
+        if(Object.keys(kho_font_da_tai).length > 0) {
+            document.getElementById('vung_chon_style').style.display = 'block';
+            cap_nhat_font_hoat_dong();
+        } else {
+            alert("Không tìm thấy dữ liệu font hợp lệ.");
+        }
+    }
+
+    function cap_nhat_font_hoat_dong() {
+        const ten_font = document.getElementById('chon_kieu_font').value;
+        const font = kho_font_da_tai[ten_font];
+        if(!font) return;
+
+        const container_map = document.getElementById('char_map_visualizer');
+        container_map.innerHTML = '';
+
+        let dem_hop_le = 0;
+        for (let i = 0; i < font.glyphs.length; i++) {
+            const glyph = font.glyphs.get(i);
+            if (glyph.unicode) {
+                const ky_tu = String.fromCharCode(glyph.unicode);
+                const o_chu = document.createElement('div');
+                o_chu.className = 'char-item';
+                o_chu.textContent = ky_tu;
+                o_chu.onclick = () => {
+                    const txt = document.getElementById('danh_sach_ky_tu');
+                    txt.value += ky_tu;
+                    kich_hoat_preview();
+                };
+                container_map.appendChild(o_chu);
+                dem_hop_le++;
+            }
+        }
+        document.getElementById('trang_thai_he_thong').innerText = `Đã nạp xong bộ font. Quét được ${dem_hop_le} ký tự khả dụng!`;
+        kich_hoat_preview();
+    }
+
+    function kich_hoat_preview() {
+        const vung_view = document.getElementById('vung_hien_thi_preview');
+        const chuoi_test = document.getElementById('chuoi_preview').value || " ";
+        
+        const mau_chu = document.getElementById('mau_chu').value.trim();
+        const mau_vien = document.getElementById('mau_vien').value.trim();
+        const do_day_vien = parseFloat(document.getElementById('do_day_vien').value) || 0;
+        const do_day_weight = parseFloat(document.getElementById('do_day_weight').value) || 0;
+        const ti_le_width = parseFloat(document.getElementById('ti_le_width').value) || 1.0;
+        const size_chu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
+
+        vung_view.textContent = chuoi_test;
+        vung_view.style.fontFamily = url_font_preview ? "'DynamicBicaFont', sans-serif" : "sans-serif";
+        vung_view.style.color = mau_chu;
+        vung_view.style.fontSize = `${size_chu}px`;
+
+        let text_shadow_or_stroke = '';
+        if (mau_vien.toLowerCase() !== 'none' && do_day_vien > 0) {
+            text_shadow_or_stroke = `-${do_day_vien}px -${do_day_vien}px 0 ${mau_vien}, ${do_day_vien}px -${do_day_vien}px 0 ${mau_vien}, -${do_day_vien}px ${do_day_vien}px 0 ${mau_vien}, ${do_day_vien}px ${do_day_vien}px 0 ${mau_vien}`;
+        }
+        vung_view.style.textShadow = text_shadow_or_stroke;
+        
+        if (do_day_weight > 0) {
+            vung_view.style.webkitTextStroke = `${do_day_weight}px ${mau_chu}`;
+        } else {
+            vung_view.style.webkitTextStroke = 'unset';
+        }
+
+        vung_view.style.transform = `scaleX(${ti_le_width})`;
+        vung_view.style.display = 'inline-block';
+    }
 
     function xuat_danh_sach_do_rong() {
         try {
@@ -210,20 +397,14 @@
             const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
             if (!font_hoat_dong) return alert("Vui lòng nạp Font chữ trước!");
 
-            // VÁ LỖI 3: Chặn size chữ âm hoặc vượt ngưỡng an toàn
             const size_chu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
-            if (size_chu < 4 || size_chu > 512) {
-                return alert("Kích thước chữ phải từ 4 đến 512 để đảm bảo an toàn hệ thống.");
-            }
-
-            // VÁ LỖI 4: Chặn crash Infinity khi unitsPerEm bằng 0 hoặc âm
-            if (!font_hoat_dong.unitsPerEm || font_hoat_dong.unitsPerEm <= 0) {
-                return alert("Font không hợp lệ: Giá trị unitsPerEm lỗi (nhỏ hơn hoặc bằng 0).");
-            }
+            const ti_le_scale = size_chu / font_hoat_dong.unitsPerEm;
+            const ti_le_width = parseFloat(document.getElementById('ti_le_width').value) || 1.0;
+            const do_day_weight = parseFloat(document.getElementById('do_day_weight').value) || 0;
+            const do_day_vien = parseFloat(document.getElementById('do_day_vien').value) || 0;
+            const phan_dem_vien = do_day_vien + do_day_weight;
 
             const danh_sach_chu = document.getElementById('danh_sach_ky_tu').value;
-            const ti_le_scale = size_chu / font_hoat_dong.unitsPerEm;
-
             let chuoi_ket_qua = danh_sach_chu + "\n";
 
             for (let i = 0; i < danh_sach_chu.length; i++) {
@@ -232,17 +413,14 @@
 
                 const glyph = font_hoat_dong.charToGlyph(ky_tu);
                 const do_rong_goc = glyph.advanceWidth !== undefined ? glyph.advanceWidth : font_hoat_dong.unitsPerEm;
-                const do_rong_ngang = do_rong_goc * ti_le_scale;
-
+                const do_rong_ngang = (do_rong_goc * ti_le_scale * ti_le_width) + phan_dem_vien;
                 chuoi_ket_qua += do_rong_ngang + "\n";
             }
 
             document.getElementById('ket_qua_do_rong').value = chuoi_ket_qua;
             document.getElementById('vung_ket_qua_text').style.display = 'block';
-            document.getElementById('trang_thai_he_thong').innerText = "Đã kết xuất ma trận độ rộng dạng văn bản!";
-        } catch (error) {
-            alert("Lỗi kết xuất văn bản: " + error.message);
-        }
+            document.getElementById('trang_thai_he_thong').innerText = "Đã kết xuất ma trận độ rộng tương ứng!";
+        } catch (error) { alert("Lỗi: " + error.message); }
     }
 
     const bo_loc_ten_sheep = { "/": "slash", "\\": "backslash", ":": "colon", "*": "asterisk", "?": "question", '"': "quote", "<": "less_than", ">": "greater_than", "|": "pipe", " ": "space", "\n": "newline", "\t": "tab", ".": "dot" };
@@ -251,23 +429,16 @@
         try {
             const ten_kieu_da_chon = document.getElementById('chon_kieu_font').value;
             const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
-            if (!font_hoat_dong) return alert("Vui lòng nạp Font chữ trước!");
+            if (!font_hoat_dong) return alert("Vui lòng nạp Font chữ!");
 
             const mau_chu = document.getElementById('mau_chu').value.trim();
-            if (!/^#([0-9A-F]{3}){1,2}$/i.test(mau_chu)) return alert("Mã màu HEX không hợp lệ!");
-
-            // VÁ LỖI 3 (Sprite): Chặn size chữ bất thường
+            const mau_vien = document.getElementById('mau_vien').value.trim();
+            const co_vien = mau_vien.toLowerCase() !== 'none';
+            
             const size_chu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
-            if (size_chu < 4 || size_chu > 512) {
-                return alert("Kích thước chữ phải từ 4 đến 512 để đảm bảo an toàn hệ thống.");
-            }
-
-            // VÁ LỖI 4 (Sprite): Kiểm tra unitsPerEm bảo vệ phép chia
-            if (!font_hoat_dong.unitsPerEm || font_hoat_dong.unitsPerEm <= 0) {
-                return alert("Font không hợp lệ: Giá trị unitsPerEm lỗi (nhỏ hơn hoặc bằng 0).");
-            }
-
-            document.getElementById('trang_thai_he_thong').innerText = "Đang đóng gói cấu trúc Sprite3...";
+            const do_day_vien = parseFloat(document.getElementById('do_day_vien').value) || 0;
+            const do_day_weight = parseFloat(document.getElementById('do_day_weight').value) || 0;
+            const ti_le_width = parseFloat(document.getElementById('ti_le_width').value) || 1.0;
 
             const danh_sach_chu = document.getElementById('danh_sach_ky_tu').value;
             const loai_can_tam = document.querySelector('input[name="loai_can_tam"]:checked').value;
@@ -277,9 +448,11 @@
             let du_lieu_costume = [];
 
             const ti_le_scale = size_chu / font_hoat_dong.unitsPerEm;
+            const phan_dem_vien = do_day_vien + do_day_weight;
+            
             const ascender_thuc = font_hoat_dong.ascender * ti_le_scale;
             const descender_thuc = font_hoat_dong.descender * ti_le_scale;
-            const chieu_cao_an_toan = ascender_thuc - descender_thuc; 
+            const chieu_cao_an_toan = (ascender_thuc - descender_thuc) + phan_dem_vien; 
 
             const mang_ky_tu_duy_nhat = [...new Set(danh_sach_chu.split(''))];
 
@@ -288,25 +461,36 @@
 
                 const glyph = font_hoat_dong.charToGlyph(ky_tu);
                 const do_rong_goc = glyph.advanceWidth !== undefined ? glyph.advanceWidth : font_hoat_dong.unitsPerEm;
-                const do_rong_ngang = do_rong_goc * ti_le_scale;
-                if (do_rong_ngang <= 0) continue;
+                let do_rong_ngang_thuc = do_rong_goc * ti_le_scale * ti_le_width;
+                if (do_rong_ngang_thuc <= 0) continue;
+
+                const do_rong_khung = do_rong_ngang_thuc + phan_dem_vien;
+                const dich_x = phan_dem_vien / 2;
+                const dich_y = ascender_thuc + (phan_dem_vien / 2);
 
                 const bbox_goc = glyph.getBoundingBox();
-                const path = glyph.getPath(0, ascender_thuc, size_chu);
+                const path = glyph.getPath(0, dich_y, size_chu);
                 const svgPathData = path.toPathData(2);
                 if (!svgPathData) continue;
 
-                const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${do_rong_ngang}" height="${chieu_cao_an_toan}" viewBox="0 0 ${do_rong_ngang} ${chieu_cao_an_toan}"><path d="${svgPathData}" fill="${mau_chu}"/></svg>`;
+                let logic_net_chu = '';
+                if (co_vien && do_day_vien > 0) {
+                    logic_net_chu += `<path d="${svgPathData}" fill="${mau_chu}" stroke="${mau_vien}" stroke-width="${do_day_vien + do_day_weight}" stroke-linejoin="round" />`;
+                }
+                let attr_weight = do_day_weight > 0 ? `stroke="${mau_chu}" stroke-width="${do_day_weight}" stroke-linejoin="round"` : '';
+                logic_net_chu += `<path d="${svgPathData}" fill="${mau_chu}" ${attr_weight} />`;
 
-                let tam_x = do_rong_ngang / 2;
+                const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${do_rong_khung}" height="${chieu_cao_an_toan}" viewBox="0 0 ${do_rong_khung} ${chieu_cao_an_toan}"><g transform="translate(${dich_x}, 0) scale(${ti_le_width}, 1)">${logic_net_chu}</g></svg>`;
+
+                let tam_x = do_rong_khung / 2;
                 let tam_y = chieu_cao_an_toan / 2;
 
                 if (loai_can_tam === 'baseline') {
-                    tam_x = do_rong_ngang / 2;
-                    tam_y = ascender_thuc; 
+                    tam_x = do_rong_khung / 2;
+                    tam_y = dich_y; 
                 } else if (loai_can_tam === 'center') {
-                    tam_x = ((bbox_goc.x1 + bbox_goc.x2) / 2) * ti_le_scale;
-                    tam_y = ascender_thuc - (((bbox_goc.y1 + bbox_goc.y2) / 2) * ti_le_scale);
+                    tam_x = ((((bbox_goc.x1 + bbox_goc.x2) / 2) * ti_le_scale) * ti_le_width) + dich_x;
+                    tam_y = dich_y - (((bbox_goc.y1 + bbox_goc.y2) / 2) * ti_le_scale);
                 }
 
                 let ten_tep_co_so = bo_loc_ten_sheep[ky_tu] || ky_tu;
@@ -321,19 +505,13 @@
                 });
             }
 
-            let cau_truc_sprite = {
-                "isStage": false, "name": "BicaFont", "variables": {}, "lists": {},
-                "broadcasts": {}, "blocks": {}, "comments": {}, "currentCostume": 0,
-                "costumes": [], "sounds": [], "volume": 100, "visible": true,
-                "x": 0, "y": 0, "size": 100, "direction": 90, "draggable": false, "rotationStyle": "all around"
-            };
+            let cau_truc_sprite = mien_cau_truc_goc();
 
             if (che_do_sua) {
                 const tep_goc = document.getElementById('tep_sprite_goc').files[0];
-                if (!tep_goc) return alert("Vui lòng nạp tệp .sprite3 gốc cần bổ sung!");
+                if (!tep_goc) return alert("Hãy nạp file .sprite3 cần sửa!");
                 const zip_goc = await JSZip.loadAsync(tep_goc);
-                const json_cu = JSON.parse(await zip_goc.file("sprite.json").async("text"));
-                cau_truc_sprite = json_cu;
+                cau_truc_sprite = JSON.parse(await zip_goc.file("sprite.json").async("text"));
 
                 for (let ten_tep in zip_goc.files) {
                     if (ten_tep !== "sprite.json") zip_xuat.file(ten_tep, await zip_goc.files[ten_tep].async("blob"));
@@ -345,19 +523,35 @@
 
             zip_xuat.file("sprite.json", JSON.stringify(cau_truc_sprite));
             const noi_dung = await zip_xuat.generateAsync({type:"blob"});
-            tai_xuong_tep(noi_dung, "BicaFont.sprite3");
-            document.getElementById('trang_thai_he_thong').innerText = "Hoàn tất đóng gói .Sprite3!";
-        } catch (error) {
-            alert("Lỗi hệ thống: " + error.message);
-        }
+            tai_xuong_tep(noi_dung, "BicaFont_V4.1.sprite3");
+            document.getElementById('trang_thai_he_thong').innerText = "Đóng gói hoàn tất bản 4.1!";
+        } catch (error) { alert("Lỗi: " + error.message); }
+    }
+
+    function mien_cau_truc_goc() {
+        return {
+            "isStage": false, "name": "BicaFontStudio", "variables": {}, "lists": {},
+            "broadcasts": {}, "blocks": {}, "comments": {}, "currentCostume": 0,
+            "costumes": [], "sounds": [], "volume": 100, "visible": true,
+            "x": 0, "y": 0, "size": 100, "direction": 90, "draggable": false, "rotationStyle": "all around"
+        };
+    }
+
+    function tao_sprite3_trong() {
+        try {
+            let zip_trong = new JSZip();
+            zip_trong.file("sprite.json", JSON.stringify(mien_cau_truc_goc()));
+            zip_trong.generateAsync({type:"blob"}).then(function(blob) {
+                tai_xuong_tep(blob, "BicaFont_Empty.sprite3");
+                document.getElementById('trang_thai_he_thong').innerText = "Đã xuất file .Sprite3 rỗng!";
+            });
+        } catch(e) { alert("Lỗi: " + e.message); }
     }
 
     function tai_xuong_tep(blob, filename) {
         const the_a = document.createElement('a');
         const url = URL.createObjectURL(blob);
-        the_a.href = url;
-        the_a.download = filename;
-        the_a.click();
+        the_a.href = url; the_a.download = filename; the_a.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 </script>
