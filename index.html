@@ -358,55 +358,55 @@
         document.getElementById('trang_thai_he_thong').innerText = `Đã nạp xong bộ font. Quét được ${dem_hop_le} ký tự khả dụng!`;
         kich_hoat_preview();
     }
+
     function kich_hoat_preview() {
-        const canvas = document.getElementById('preview_canvas');
-        const ctx = canvas.getContext('2d');
+        const vung_view = document.getElementById('vung_hien_thi_preview');
         const chuoi_test = document.getElementById('chuoi_preview').value || "Preview";
-        
-        // Lấy và giới hạn giá trị
+    
+        // LẤY GIÁ TRỊ (thiếu là crash nhẹ)
         const size_chu = Math.min(Math.max(parseInt(document.getElementById('kich_thuoc_chu').value) || 64, 4), 512);
-        const do_day_vien = Math.min(Math.max(parseFloat(document.getElementById('do_day_vien').value) || 0, 0), 15);
-        const do_day_weight = Math.min(Math.max(parseFloat(document.getElementById('do_day_weight').value) || 0, 0), 10);
-        const ti_le_width = Math.min(Math.max(parseFloat(document.getElementById('ti_le_width').value) || 1.0, 0.3), 3.0);
-        
         const mau_chu = document.getElementById('mau_chu').value;
         const mau_vien = document.getElementById('mau_vien').value;
+        const do_day_vien = Math.min(Math.max(parseFloat(document.getElementById('do_day_vien').value) || 0, 0), 15);
     
-        // Reset Canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Lấy font đang active
+        // FONT ACTIVE
         const ten_font = document.getElementById('chon_kieu_font').value;
         const font = kho_font_da_tai[ten_font];
-        if (!font) return;
     
-        // Thiết lập vẽ
-        ctx.save();
-        ctx.scale(ti_le_width, 1); // Áp dụng scaleWidth
-        
-        // Tạo path từ font
-        const path = font.getPath(chuoi_test, 20, 120, size_chu);
-        
-        // Vẽ Viền (nếu có)
+        if (!font) {
+            vung_view.textContent = "Chưa có font";
+            return;
+        }
+    
+        const font_url = font._blobUrl; 
+        if (font_url) {
+            const styleId = "dynamic_font_face";
+            let styleTag = document.getElementById(styleId);
+    
+            if (!styleTag) {
+                styleTag = document.createElement("style");
+                styleTag.id = styleId;
+                document.head.appendChild(styleTag);
+            }
+    
+            styleTag.textContent = `
+                @font-face {
+                    font-family: "DynamicBicaFont";
+                    src: url("${font_url}");
+                }
+            `;
+        }
+    
+        // APPLY STYLE
+        vung_view.style.fontFamily = "'DynamicBicaFont', sans-serif";
+        vung_view.textContent = chuoi_test;
+        vung_view.style.fontSize = `${size_chu}px`;
+        vung_view.style.color = mau_chu;
+    
+        // STROKE (optional)
         if (mau_vien !== 'none' && do_day_vien > 0) {
-            ctx.strokeStyle = mau_vien;
-            ctx.lineWidth = do_day_vien * 2; // Nhân đôi để khớp với logic vẽ viền SVG
-            ctx.lineJoin = 'round';
-            path.draw(ctx);
-            ctx.stroke();
+            vung_view.style.webkitTextStroke = `${do_day_vien}px ${mau_vien}`;
         }
-        
-        // Vẽ Chữ (Fill)
-        ctx.fillStyle = mau_chu;
-        if (do_day_weight > 0) {
-            ctx.strokeStyle = mau_chu;
-            ctx.lineWidth = do_day_weight;
-            ctx.stroke();
-        }
-        path.draw(ctx);
-        ctx.fill();
-        
-        ctx.restore();
     }
     function xuat_danh_sach_do_rong() {
         try {
