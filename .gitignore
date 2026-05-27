@@ -1,0 +1,11 @@
+*.zip
+*.sprite3
+*.svg
+widths.json
+
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+.vscode/
+.idea/
