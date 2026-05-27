@@ -358,17 +358,18 @@
         document.getElementById('trang_thai_he_thong').innerText = `Đã nạp xong bộ font. Quét được ${dem_hop_le} ký tự khả dụng!`;
         kich_hoat_preview();
     }
-
     function kich_hoat_preview() {
         const vung_view = document.getElementById('vung_hien_thi_preview');
         const chuoi_test = document.getElementById('chuoi_preview').value || " ";
         
         const mau_chu = document.getElementById('mau_chu').value.trim();
         const mau_vien = document.getElementById('mau_vien').value.trim();
-        const do_day_vien = parseFloat(document.getElementById('do_day_vien').value) || 0;
-        const do_day_weight = parseFloat(document.getElementById('do_day_weight').value) || 0;
-        const ti_le_width = parseFloat(document.getElementById('ti_le_width').value) || 1.0;
-        const size_chu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
+        
+        // --- CHỖ CẦN BỌC LIMIT ---
+        const do_day_vien = Math.min(Math.max(parseFloat(document.getElementById('do_day_vien').value) || 0, 0), 15);
+        const do_day_weight = Math.min(Math.max(parseFloat(document.getElementById('do_day_weight').value) || 0, 0), 10);
+        const ti_le_width = Math.min(Math.max(parseFloat(document.getElementById('ti_le_width').value) || 1.0, 0.3), 3.0);
+        const size_chu = Math.min(Math.max(parseInt(document.getElementById('kich_thuoc_chu').value) || 64, 4), 512);
 
         vung_view.textContent = chuoi_test;
         vung_view.style.fontFamily = url_font_preview ? "'DynamicBicaFont', sans-serif" : "sans-serif";
@@ -435,11 +436,11 @@
             const mau_vien = document.getElementById('mau_vien').value.trim();
             const co_vien = mau_vien.toLowerCase() !== 'none';
             
-            const size_chu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
-            const do_day_vien = parseFloat(document.getElementById('do_day_vien').value) || 0;
-            const do_day_weight = parseFloat(document.getElementById('do_day_weight').value) || 0;
-            const ti_le_width = parseFloat(document.getElementById('ti_le_width').value) || 1.0;
-
+            const size_chu = Math.min(Math.max(parseInt(document.getElementById('kich_thuoc_chu').value) || 64, 4), 512);
+            const do_day_vien = Math.min(Math.max(parseFloat(document.getElementById('do_day_vien').value) || 0, 0), 15);
+            const do_day_weight = Math.min(Math.max(parseFloat(document.getElementById('do_day_weight').value) || 0, 0), 10);
+            const ti_le_width = Math.min(Math.max(parseFloat(document.getElementById('ti_le_width').value) || 1.0, 0.3), 3.0);
+            
             const danh_sach_chu = document.getElementById('danh_sach_ky_tu').value;
             const loai_can_tam = document.querySelector('input[name="loai_can_tam"]:checked').value;
             const che_do_sua = document.querySelector('input[name="che_do"]:checked').value === 'modify';
