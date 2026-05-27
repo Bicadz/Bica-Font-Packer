@@ -316,14 +316,34 @@
 
     function dung_bo_giao_dien_sau_tai() {
         const ui_chon_kieu = document.getElementById('chon_kieu_font');
-        ui_chon_kieu.innerHTML = '';
-        for(let ten in kho_font_da_tai) {
+        ui_chon_kieu.innerHTML = ''; // Xóa sạch danh sách cũ
+    
+        for (let ten in kho_font_da_tai) {
             const option = document.createElement('option');
-            option.value = ten; option.textContent = ten;
+            option.value = ten;
+    
+            // Tách tên Font và Kiểu (Ví dụ: "Roboto Mono Thin - Regular" -> Family: Roboto Mono Thin, Style: Regular)
+            // Nếu tên không có dấu " - ", nó sẽ hiển thị toàn bộ
+            let parts = ten.split(' - ');
+            let displayLabel = parts.length > 1 
+                ? `${parts[0]} [${parts[1].toUpperCase()}]` 
+                : ten;
+    
+            option.innerHTML = displayLabel;
+            
+            // Thêm một chút CSS cho option nếu cần (một số trình duyệt sẽ hỗ trợ)
+            if (ten.toLowerCase().includes('italic')) {
+                option.style.fontStyle = 'italic';
+            }
+    
             ui_chon_kieu.appendChild(option);
         }
-        if(Object.keys(kho_font_da_tai).length > 0) {
+    
+        if (Object.keys(kho_font_da_tai).length > 0) {
             document.getElementById('vung_chon_style').style.display = 'block';
+            
+            // Mặc định chọn font đầu tiên trong danh sách
+            ui_chon_kieu.selectedIndex = 0;
             cap_nhat_font_hoat_dong();
         } else {
             alert("Không tìm thấy dữ liệu font hợp lệ.");
