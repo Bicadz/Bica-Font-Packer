@@ -59,7 +59,7 @@
         
         <div id="vung_chon_style" style="display: none; margin-top: 15px;">
             <label>Chọn kiểu Font hoạt động:</label>
-            <select id="chon_kieu_font" onchange="cap_nhat_font_hoat_dong()"></select>
+            <div id="vung_chon_style" style="display: none;"></div>
         </div>
     </div>
 
@@ -309,55 +309,81 @@
             let ten_font_goc = lay_ten_font_an_toan(font_parse);
             let ten_font = ten_font_goc;
             let dem = 1;
-            while (kho_font_da_tai[ten_font]) { ten_font = `${ten_font_goc} (${dem++})`; }
+            while (kho_font_da_tai[ten_font]) { 
+                ten_font = `${ten_font_goc} (${dem++})`; 
+            }
+    
+            // 1. Tạo tên font an toàn không chứa ký tự đặc biệt để làm font-family trong CSS
+            const safeName = "F_" + ten_font.replace(/[^a-zA-Z0-9]/g, '_');
+            font_parse._safeName = safeName;
+    
+            // 2. Tạo Blob URL từ buffer để trình duyệt có thể load font trực tiếp
+            const blob = new Blob([buffer], {type: 'font/ttf'});
+            font_parse._blobUrl = URL.createObjectURL(blob);
+    
+            // 3. Bơm thẻ style @font-face vào head để các item trong danh sách radio hiển thị đúng mặt chữ
+            let styleTag = document.getElementById('style_' + safeName);
+            if (!styleTag) {
+                styleTag = document.createElement('style');
+                styleTag.id = 'style_' + safeName;
+                styleTag.textContent = `@font-face { font-family: "${safeName}"; src: url("${font_parse._blobUrl}"); }`;
+                document.head.appendChild(styleTag);
+            }
+    
             kho_font_da_tai[ten_font] = font_parse;
-        } catch(e) { console.log("Bỏ qua tệp hỏng."); }
+        } catch(e) { 
+            console.log("Bỏ qua tệp hỏng.", e); 
+        }
     }
 
     function dung_bo_giao_dien_sau_tai() {
-        const ui_chon_kieu = document.getElementById('chon_kieu_font');
-        ui_chon_kieu.innerHTML = ''; // Xóa sạch danh sách cũ
-    
+        const container = document.getElementById('vung_chon_style');
+        if (!container) return;
+        
+        let html = `<label style="font-weight:bold; color:#aaa; display:block; margin-bottom:5px;">Chọn kiểu Font:</label>`;
+        html += `<div style="background:#1a1a22; border:1px solid #444; border-radius:6px; max-height:200px; overflow-y:auto; padding:5px;">`;
+        
         for (let ten in kho_font_da_tai) {
-            const option = document.createElement('option');
-            option.value = ten;
-    
-            // Tách tên Font và Kiểu (Ví dụ: "Roboto Mono Thin - Regular" -> Family: Roboto Mono Thin, Style: Regular)
-            // Nếu tên không có dấu " - ", nó sẽ hiển thị toàn bộ
-            let parts = ten.split(' - ');
-            let displayLabel = parts.length > 1 
-                ? `${parts[0]} [${parts[1].toUpperCase()}]` 
-                : ten;
-    
-            option.innerHTML = displayLabel;
+            const font = kho_font_da_tai[ten];
+            const safeName = font._safeName || "sans-serif";
             
-            // Thêm một chút CSS cho option nếu cần (một số trình duyệt sẽ hỗ trợ)
-            if (ten.toLowerCase().includes('italic')) {
-                option.style.fontStyle = 'italic';
-            }
-    
-            ui_chon_kieu.appendChild(option);
+            html += `
+                <label style="display:flex; align-items:center; padding:8px; cursor:pointer; border-bottom:1px solid #333;">
+                    <input type="radio" name="font_choice" value="${ten}" onchange="cap_nhat_font_hoat_dong()" style="margin-right:10px; transform:scale(1.2);">
+                    <span style="font-family:'${safeName}', sans-serif; font-size:16px; color:#fff;">ABCDEFGadcdefg - ${ten}</span>
+                </label>`;
         }
-    
-        if (Object.keys(kho_font_da_tai).length > 0) {
-            document.getElementById('vung_chon_style').style.display = 'block';
-            
-            // Mặc định chọn font đầu tiên trong danh sách
-            ui_chon_kieu.selectedIndex = 0;
+        html += `</div>`;
+        
+        container.innerHTML = html;
+        container.style.display = 'block';
+        
+        // Tự động chọn font đầu tiên trong danh sách vừa nạp
+        const firstRadio = container.querySelector('input[type="radio"]');
+        if (firstRadio) {
+            firstRadio.checked = true;
             cap_nhat_font_hoat_dong();
-        } else {
-            alert("Không tìm thấy dữ liệu font hợp lệ.");
         }
     }
 
     function cap_nhat_font_hoat_dong() {
-        const ten_font = document.getElementById('chon_kieu_font').value;
+        // 1. Đọc tên font từ radio đang được tick chọn
+        const selectedRadio = document.querySelector('input[name="font_choice"]:checked');
+        const ten_font = selectedRadio ? selectedRadio.value : Object.keys(kho_font_da_tai)[0];
+    
         const font = kho_font_da_tai[ten_font];
-        if(!font) return;
-
+        if (!font) return;
+    
+        // 2. Áp dụng font chữ thật vào vùng preview hiển thị bằng CSS font-family
+        const vung_preview = document.getElementById('vung_hien_thi_preview');
+        if (vung_preview) {
+            vung_preview.style.fontFamily = `"${font._safeName}", sans-serif`;
+        }
+    
+        // 3. Giữ nguyên vẹn logic quét glyph và render map ký tự gốc của ông
         const container_map = document.getElementById('char_map_visualizer');
         container_map.innerHTML = '';
-
+    
         let dem_hop_le = 0;
         for (let i = 0; i < font.glyphs.length; i++) {
             const glyph = font.glyphs.get(i);
@@ -376,6 +402,8 @@
             }
         }
         document.getElementById('trang_thai_he_thong').innerText = `Đã nạp xong bộ font. Quét được ${dem_hop_le} ký tự khả dụng!`;
+        
+        // Gọi preview cập nhật lại text
         kich_hoat_preview();
     }
 
