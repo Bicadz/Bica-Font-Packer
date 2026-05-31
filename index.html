@@ -8,672 +8,1683 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #18181c; color: #f5f5f7; margin: 0; padding: 20px; }
-        .container { max-width: 950px; margin: 0 auto; background: #22222b; padding: 25px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { text-align: center; color: #ff4757; margin-bottom: 25px; font-weight: 700; letter-spacing: 1px; }
-        .step { background: #2a2a35; padding: 18px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #ff4757; }
-        .step h3 { margin-top: 0; color: #ff6b81; display: flex; justify-content: space-between; align-items: center; }
-        label { font-size: 14px; font-weight: 600; color: #ddd; display: block; margin-top: 10px; }
-        input[type="text"], input[type="number"], textarea, input[type="file"], select { width: 100%; padding: 10px; margin-top: 6px; box-sizing: border-box; border-radius: 6px; border: 1px solid #444; background: #1a1a22; color: #fff; font-size: 14px; }
-        textarea { height: 80px; resize: vertical; }
-        .row { display: flex; gap: 15px; margin-top: 5px; }
-        .row > div { flex: 1; }
-        .color-picker-wrapper { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
-        input[type="color"] { width: 45px; height: 38px; border: 1px solid #444; background: none; border-radius: 6px; cursor: pointer; padding: 0; }
-        .radio-group { background: #1a1a22; padding: 12px; border-radius: 6px; margin-top: 8px; }
-        .radio-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .radio-item:last-child { margin-bottom: 0; }
-        .radio-item input { width: 18px; height: 18px; cursor: pointer; }
-        button { background: #ff4757; color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 12px; font-size: 15px; transition: 0.2s; }
-        button:hover { background: #ff6b81; }
-        .btn-secondary { background: #2ed573; }
-        .btn-secondary:hover { background: #2ecc71; }
-        .btn-dark { background: #4b6584; }
-        .btn-dark:hover { background: #778ca3; }
-        .status { margin-top: 15px; padding: 12px; border-radius: 6px; background: #111; font-size: 14px; color: #eccc68; text-align: center; font-weight: bold; }
-        
-        /* Bảng ký tự Character Map */
-        .char-map-container { background: #1a1a22; border: 1px solid #444; border-radius: 6px; height: 120px; overflow-y: auto; padding: 10px; margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 6px; }
-        .char-item { background: #2a2a35; text-align: center; padding: 5px 0; border-radius: 4px; cursor: pointer; user-select: none; font-size: 16px; border: 1px solid transparent; transition: 0.1s; }
-        .char-item:hover { background: #ff4757; color: white; border-color: #ff6b81; }
-        
-        /* Khung nhóm nút bấm chữ mẫu nhanh */
-        .preset-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-        .btn-preset-text { background: #3c3c4e; color: #fff; padding: 6px 12px; font-size: 12px; border-radius: 4px; width: auto; margin-top: 0; font-weight: normal; border: 1px solid #555; }
-        .btn-preset-text:hover { background: #4e4e66; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #18181c;
+            color: #f5f5f7;
+            margin: 0;
+            padding: 20px;
+        }
 
-        /* Khung xem trước Preview */
-        .preview-box { background: #111; border: 2px dashed #ff4757; border-radius: 8px; padding: 15px; margin-top: 10px; min-height: 80px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-align: center; word-break: break-all; }
-        .preview-text { font-size: 40px; line-height: 1.2; color: #fff; }
-        .output-box { background: #111; color: #2ed573; font-family: monospace; height: 120px; margin-top: 10px; }
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: #22222b;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff4757;
+            margin-bottom: 25px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .step {
+            background: #2a2a35;
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid #ff4757;
+        }
+
+        .step h3 {
+            margin-top: 0;
+            color: #ff6b81;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ddd;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            box-sizing: border-box;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #1a1a22;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        #danh_sach_ky_tu {
+            width: auto;
+            min-width: 100%;
+        }
+
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .row>div {
+            flex: 1;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 6px;
+        }
+
+        input[type="color"] {
+            width: 45px;
+            height: 38px;
+            border: 1px solid #444;
+            background: none;
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .radio-group {
+            background: #1a1a22;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .radio-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .radio-item input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        button {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #ff6b81;
+        }
+
+        .btn-secondary {
+            background: #2ed573;
+        }
+
+        .btn-secondary:hover {
+            background: #2ecc71;
+        }
+
+        .btn-cyan {
+            background: #0abde3;
+        }
+
+        .btn-cyan:hover {
+            background: #00d2d3;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            background: #111;
+            font-size: 14px;
+            color: #eccc68;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status:empty {
+            display: none;
+        }
+
+        .split-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .split-left {
+            flex: 1.2;
+        }
+
+        .split-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 768px) {
+            .split-container {
+                flex-direction: column;
+            }
+        }
+
+        .char-map-container {
+            background: #1a1a22;
+            border: 1px solid #444;
+            border-radius: 6px;
+            min-height: 162px;
+            max-height: 162px;
+            overflow-y: auto;
+            padding: 10px;
+            margin-top: 8px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
+            gap: 6px;
+        }
+
+        .char-item {
+            background: #2a2a35;
+            text-align: center;
+            padding: 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 16px;
+            border: 1px solid transparent;
+            transition: 0.1s;
+        }
+
+        .char-item:not(.char-empty):hover {
+            background: #ff4757;
+            color: white;
+            border-color: #ff6b81;
+        }
+
+        .char-item.char-disabled {
+            opacity: 0.3;
+            background: #333;
+            color: #666;
+        }
+
+        .char-item.char-disabled:hover {
+            background: #444;
+            color: #888;
+        }
+
+        .preview-box {
+            background: #111;
+            border: 2px dashed #ff4757;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            flex-grow: 1;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            text-align: center;
+            word-break: break-all;
+        }
+
+        .preview-text {
+            font-size: 40px;
+            line-height: 1.2;
+            color: #fff;
+        }
+
+        .output-box {
+            background: #111;
+            color: #2ed573;
+            font-family: monospace;
+            height: 120px;
+            margin-top: 10px;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h1>Bica Font Packer</h1>
-
-    <div class="step">
-        <h3>Bước 1 - Nạp tệp tin Font (.ttf, .otf, .woff, .zip)</h3>
-        <input type="file" id="tep_font_goc" accept=".ttf,.otf,.woff,.zip">
-        
-        <div id="vung_chon_style" style="display: none; margin-top: 15px;">
-            <label>Chọn kiểu Font hoạt động:</label>
-            <div id="vung_chon_style" style="display: none;"></div>
-        </div>
-    </div>
-
-    <div class="step">
-        <h3>Bước 2 - Quản lý danh sách ký tự đóng gói</h3>
-        
-        <div class="row">
-            <div>
-                <label>Cách 1: Chọn nhanh bảng chữ cái ngôn ngữ:</label>
-                <select id="preset_ngon_ngu" onchange="doi_preset_ngon_ngu()">
-                    <option value="latin">Tiếng Anh / Latinh Cơ Bản</option>
-                    <option value="vietnamese" selected>Tiếng Việt (Đầy đủ dấu)</option>
-                    <option value="korean">Tiếng Hàn Quốc (Hangul cơ bản)</option>
-                    <option value="japanese">Tiếng Nhật Bản (Kana)</option>
-                </select>
-            </div>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin: 0;">Bica Font Packer</h1>
+            <select id="language_selector" onchange="doi_ngon_ngu()" style="padding: 8px; border-radius: 6px; border: 1px solid #444; background: #1a1a22; color: #fff; cursor: pointer; width: 150px;">
+                <option value="vi">Tiếng Việt</option>
+                <option value="en">English</option>
+            </select>
         </div>
 
-        <label style="color: #2ed573; margin-top: 12px;">Cách 2: Dán văn bản/Lời thoại game mẫu (Tự lọc ký tự duy nhất để tối ưu RAM):</label>
-        <textarea id="van_ban_goc_mau" placeholder="Dán đoạn văn, lời thoại game, hoặc câu bất kỳ vào đây... Hệ thống sẽ tự lọc ra danh sách chữ cái duy nhất để tạo costume!" oninput="loc_ky_tu_tu_van_ban_mau()"></textarea>
+        <div class="step">
+            <h3>Bước 1 - Nạp tệp tin Font (.ttf, .otf, .woff, .zip)</h3>
+            <input type="file" id="tep_font_goc" accept=".ttf,.otf,.woff,.zip">
 
-        <label style="margin-top:12px;">Bảng ký tự có sẵn trong Font (Click để chèn nhanh):</label>
-        <div class="char-map-container" id="char_map_visualizer">
-            <div style="color: #aaa; grid-column: 1/-1; text-align: center; font-style: italic; padding-top: 35px;">Hãy nạp Font để hiển thị bản đồ ký tự...</div>
+            <div id="vung_chon_style" style="display: none; margin-top: 15px;"></div>
         </div>
 
-        <label style="margin-top:12px; font-weight: bold; color: #ff6b81;">Chuỗi ký tự cuối cùng sẽ xuất bản:</label>
-        <textarea id="danh_sach_ky_tu" oninput="kich_hoat_preview()">abcdefghijklmnopqrstuvwxyz!#$%"&'()*+,-./0123456789:;<=>?@[\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ</textarea>
-    </div>
+        <div class="step">
+            <h3>Bước 2 - Quản lý danh sách ký tự đóng gói</h3>
 
-    <div class="step">
-        <h3>Bước 3 - Tùy biến Style & Kiểu dáng nét chữ</h3>
-        <div class="row">
-            <div>
-                <label>Màu sắc chữ:</label>
-                <div class="color-picker-wrapper">
-                    <input type="text" id="mau_chu" value="#ffffff" oninput="dong_bo_mau('mau_chu', 'picker_mau_chu')">
-                    <input type="color" id="picker_mau_chu" value="#ffffff" oninput="dong_bo_mau('picker_mau_chu', 'mau_chu')">
+            <div class="row">
+                <div>
+                    <label>Cách 1: Chọn nhanh bảng chữ cái ngôn ngữ:</label>
+                    <select id="preset_ngon_ngu" onchange="doi_preset_ngon_ngu()">
+                        <option value="vietnamese">Tiếng Việt</option>
+                        <option value="latin"     selected>Latin Cơ Bản</option>
+                        <option value="turkish"   >Tiếng Thổ Nhĩ Kì</option>
+                        <option value="portuguese">Tiếng Bồ Đào Nha</option>
+                        <option value="spanish"   >Tiếng Tây Ban Nha (Español)</option>
+                        <option value="german"    >Tiếng Đức (Deutsch)</option>
+                        <option value="russian"   >Tiếng Nga (Cyrillic)</option>
+                        <option value="french"    >Tiếng Pháp</option>
+                        <option value="greek"     >Tiếng Hy Lạp (Greek)</option>
+                        <option value="polish"    >Tiếng Ba Lan (Polish)</option>
+                        <option value="czech"     >Tiếng Séc (Czech)</option>
+                        <option value="swedish"   >Tiếng Thụy Điển (Swedish)</option>
+                        <option value="norwegian" >Tiếng Na Uy (Norwegian)</option>
+                        <option value="danish"    >Tiếng Đan Mạch (Danish)</option>
+                        <option value="romanian"  >Tiếng Rumani (Romanian)</option>
+                        <option value="hungarian" >Tiếng Hungary (Hungarian)</option>
+                        <option value="croatian"  >Tiếng Croatia (Croatian)</option>
+                        <option value="serbian"   >Tiếng Serbia (Serbian)</option>
+                        <option value="ukrainian" >Tiếng Ukraina (Ukrainian)</option>
+                    </select>
                 </div>
             </div>
-            <div>
-                <label>Màu viền chữ ('none' nếu ko viền):</label>
-                <div class="color-picker-wrapper">
-                    <input type="text" id="mau_vien" value="none" oninput="dong_bo_mau('mau_vien', 'picker_mau_vien')">
-                    <input type="color" id="picker_mau_vien" value="#ff4757" oninput="dong_bo_mau('picker_mau_vien', 'mau_vien')">
+
+            <label style="color: #2ed573; margin-top: 12px;">Cách 2: Dán văn bản/Lời thoại game mẫu (Tự lọc ký tự duy nhất):</label>
+            <textarea id="van_ban_goc_mau" placeholder="Dán đoạn văn, lời thoại game, hoặc câu bất kỳ vào đây... Hệ thống sẽ tự lọc ra danh sách chữ cái duy nhất " oninput="loc_ky_tu_tu_van_ban_mau()"></textarea>
+
+            <label style="margin-top:12px;">Bảng ký tự có sẵn trong Font (Click để chèn nhanh):</label>
+            <div class="char-map-container" id="char_map_visualizer">
+                <div style="color: #aaa; grid-column: 1/-1; text-align: center; font-style: italic; padding-top: 55px;">Hãy nạp Font để hiển thị bản đồ ký tự...</div>
+            </div>
+
+            <div style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 45px;
+                gap: 10px;
+                margin-top: -5px;
+                user-select: none;
+            ">
+                <button onclick="doi_page_ky_tu(-1)" style="
+                    background: #2a2a35;
+                    color: #fff;
+                    border: 1px solid #444;
+                    padding: 6px 12px; 
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: 0.2s;
+                " onmouseover="this.style.background='#3a3a45'" onmouseout="this.style.background='#2a2a35'">
+                    ◀
+                </button>
+
+                <div id="char_map_page_text" style="
+                    font-family: monospace;
+                    font-size: 14px;
+                    color: #aaa;
+                    min-width: 60px;
+                    margin-top: 15px;
+                    text-align: center;
+                    font-weight: bold;
+                ">
+                    0 / 0
+                </div>
+
+                <button onclick="doi_page_ky_tu(1)" style="
+                    background: #2a2a35;
+                    color: #fff;
+                    border: 1px solid #444;
+                    padding: 6px 12px; 
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: 0.2s;
+                " onmouseover="this.style.background='#3a3a45'" onmouseout="this.style.background='#2a2a35'">
+                    ▶
+                </button>
+            </div>
+
+            <label style="margin-top:12px; font-weight: bold; color: #ff6b81;">Chuỗi ký tự cuối cùng sẽ xuất bản:</label>
+            <textarea id="danh_sach_ky_tu" oninput="kich_hoat_preview()">abcdefghijklmnopqrstuvwxyz!#$%"&'()*+,-./0123456789:;<=>?@[\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZ</textarea>
+        </div>
+
+        <div class="step">
+            <h3>Bước 3 - Tùy biến kiểu & Xem trước kiểu chữ</h3>
+            
+            <div class="split-container">
+                <div class="split-left">
+                    <div class="row">
+                        <div>
+                            <label>Màu sắc chữ:</label>
+                            <div class="color-picker-wrapper">
+                                <input type="text" id="mau_chu" value="#ffffff" oninput="dong_bo_mau('mau_chu', 'picker_mau_chu')">
+                                <input type="color" id="picker_mau_chu" value="#ffffff" oninput="dong_bo_mau('picker_mau_chu', 'mau_chu')">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; margin-bottom: 6px;">
+                                <input type="checkbox" id="co_vien_checkbox" onchange="toggle_vien()" style="width: 14px; height: 14px; cursor: pointer;">
+                                <span id="co_vien_label">Bật viền ngoài</span>
+                            </label>
+                            <label id="mau_vien_label" style="display: block; margin-bottom: 6px;">Màu viền:</label>
+                            <div class="color-picker-wrapper" id="vung_chon_mau_vien" style="opacity: 0.4;">
+                                <input type="text" id="mau_vien" value="#ff4757" oninput="dong_bo_mau('mau_vien', 'picker_mau_vien')" disabled>
+                                <input type="color" id="picker_mau_vien" value="#ff4757" oninput="dong_bo_mau('picker_mau_vien', 'mau_vien')" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 10px;">
+                        <div>
+                            <label>Kích thước chữ (Size 4 - 512):</label>
+                            <input type="number" id="kich_thuoc_chu" value="64" min="4" max="512" oninput="kich_hoat_preview()">
+                        </div>
+                        <div>
+                            <label>Độ dày viền ngoài (0 - <span id="max_stroke_display">8</span>):</label>
+                            <input type="number" id="do_day_vien" value="2" min="0" max="100" oninput="kich_hoat_preview()" style="opacity: 0.4;" disabled>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 10px;">
+                        <div>
+                            <label>Độ béo nét chữ (Weight phụ: 0 - 10):</label>
+                            <input type="number" id="do_day_weight" value="0" min="0" max="10" step="0.5" oninput="kich_hoat_preview()">
+                        </div>
+                        <div>
+                            <label>Tỉ lệ rộng chữ (Width scale: 0.3 - 3.0):</label>
+                            <input type="number" id="ti_le_width" value="1.0" min="0.3" max="3.0" step="0.1" oninput="kich_hoat_preview()">
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 10px;">
+                        <div style="flex: 1;">
+                            <label style="display:block; margin-bottom:8px; font-weight:bold;">Chế độ căn tâm tọa độ:</label>
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" id="align_baseline" name="loai_can_tam" value="baseline" checked onchange="kich_hoat_preview()">
+                                    <label for="align_baseline">Căn theo dòng chữ (Baseline)</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="align_center" name="loai_can_tam" value="center_glyph" onchange="kich_hoat_preview()">
+                                    <label for="align_center">Căn giữa hình chữ (Center Glyph)</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="align_default" name="loai_can_tam" value="center_box" onchange="kich_hoat_preview()">
+                                    <label for="align_default">Căn giữa khung (Center Box)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="split-right">
+                    <label>Nhập chuỗi văn bản hiển thị thử:</label>
+                    <input type="text" id="chuoi_preview" value="Bica Font Packer" oninput="kich_hoat_preview()">
+
+                    <div class="preview-box">
+                        <div id="vung_hien_thi_preview"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="row" style="margin-top: 10px;">
-            <div>
-                <label>Kích thước chữ (Size 4 - 512):</label>
-                <input type="number" id="kich_thuoc_chu" value="64" min="4" max="512" oninput="kich_hoat_preview()">
+        <div class="step">
+            <h3>Bước 4 - Xuất bản sản phẩm</h3>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" id="che_do_tao_moi" name="che_do" value="new" checked>
+                    <label for="che_do_tao_moi" style="font-weight:bold;">Tạo mới tệp .Sprite3</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" id="che_do_sua" name="che_do" value="modify">
+                    <label for="che_do_sua" style="font-weight:bold;">Sửa đổi / Nối đuôi file .Sprite3 có sẵn</label>
+                </div>
             </div>
-            <div>
-                <label>Độ dày viền ngoài (0 - 15):</label>
-                <input type="number" id="do_day_vien" value="0" min="0" max="15" oninput="kich_hoat_preview()">
+            <div id="vung_chon_sprite" style="display: none; margin-top: 10px;">
+                <label>Nạp tệp .sprite3 gốc cần bổ sung:</label>
+                <input type="file" id="tep_sprite_goc" accept=".sprite3">
+            </div>
+
+            <div class="row" style="margin-top: 15px;">
+                <div>
+                    <button onclick="xuat_danh_sach_do_rong()" class="btn-secondary">1. Xuất danh sách độ rộng</button>
+                </div>
+                <div>
+                    <button onclick="bat_dau_xu_ly_sprite()">2. Tải về .Sprite3</button>
+                </div>
+                <div>
+                    <button onclick="bat_dau_xu_ly_zip_svg()" class="btn-cyan">3. Tải về .Zip (Chứa SVG)</button>
+                </div>
+            </div>
+
+            <div id="vung_ket_qua_text" style="display:none; margin-top:15px;">
+                <label style="font-weight:bold; color:#2ed573;">Dữ liệu ma trận độ rộng ngang:</label>
+                <textarea id="ket_qua_do_rong" class="output-box" readonly></textarea>
             </div>
         </div>
 
-        <div class="row" style="margin-top: 10px;">
-            <div>
-                <label>Độ béo nét chữ (Weight phụ: 0 - 10):</label>
-                <input type="number" id="do_day_weight" value="0" min="0" max="10" step="0.5" oninput="kich_hoat_preview()">
-            </div>
-            <div>
-                <label>Tỉ lệ rộng chữ (Width scale: 0.3 - 3.0):</label>
-                <input type="number" id="ti_le_width" value="1.0" min="0.3" max="3.0" step="0.1" oninput="kich_hoat_preview()">
-            </div>
-        </div>
-
-        <label style="display:block; margin-top:12px; font-weight:bold;">Chế độ căn tâm tọa độ:</label>
-        <div class="radio-group">
-            <div class="radio-item">
-                <input type="radio" id="align_baseline" name="loai_can_tam" value="baseline" checked align onchange="kich_hoat_preview()">
-                <label for="align_baseline">Căn theo dòng chữ (Baseline)</label>
-            </div>
-            <div class="radio-item">
-                <input type="radio" id="align_center" name="loai_can_tam" value="center" onchange="kich_hoat_preview()">
-                <label for="align_center">Căn giữa hình chữ (Trung tâm nét chữ)</label>
-            </div>
-            <div class="radio-item">
-                <input type="radio" id="align_default" name="loai_can_tam" value="default" onchange="kich_hoat_preview()">
-                <label for="align_default">Căn giữa khung (Mặc định)</label>
-            </div>
-        </div>
+        <div class="status" id="trang_thai_he_thong"></div>
     </div>
 
-    <div class="step">
-        <h3>Bước 4 - Khung xem trước thời gian thực (Live Preview)</h3>
-        <label>Nhập chuỗi test hiển thị thử:</label>
-        <input type="text" id="chuoi_preview" value="Bica Studio V4.1" oninput="kich_hoat_preview()">
-        
-        <div class="preset-buttons">
-            <button class="btn-preset-text" onclick="nap_chu_mau_preview('Bica Studio')">Mặc định</button>
-            <button class="btn-preset-text" onclick="nap_chu_mau_preview('0123456789 !@#$%^&*()')">Chữ số & Ký tự</button>
-            <button class="btn-preset-text" onclick="nap_chu_mau_preview('Form dáng chữ Đầy Đủ Dấu Tiếng Việt')">Tiếng Việt Dấu</button>
-            <button class="btn-preset-text" onclick="nap_chu_mau_preview('The quick brown fox jumps over the lazy dog')">English Pangram</button>
-            <button class="btn-preset-text" onclick="nap_chu_mau_preview('안녕하세요! 감사합니다. 대박!')">Korean Test</button>
-        </div>
+    <script>
+        let kho_font_da_tai = {};
+        let url_font_preview = null;
+        let currentLanguage = 'vi';
 
-        <div class="preview-box">
-            <div id="vung_hien_thi_preview"></div>
-        </div>
-    </div>
+        const chuoi_base = "abcdefghijklmnopqrstuvwxyz!#$%\n\"&'()*+,-./0123456789:;<=>?@[\\\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    <div class="step">
-        <h3>Bước 5 - Xuất bản sản phẩm</h3>
-        <div class="radio-group">
-            <div class="radio-item">
-                <input type="radio" id="che_do_tao_moi" name="che_do" value="new" checked>
-                <label for="che_do_tao_moi" style="font-weight:bold;">Tạo mới tệp .Sprite3</label>
-            </div>
-            <div class="radio-item">
-                <input type="radio" id="che_do_sua" name="che_do" value="modify">
-                <label for="che_do_sua" style="font-weight:bold;">Sửa đổi / Nối đuôi file .Sprite3 có sẵn</label>
-            </div>
-        </div>
-        <div id="vung_chon_sprite" style="display: none; margin-top: 10px;">
-            <label>Nạp tệp .sprite3 gốc cần bổ sung:</label>
-            <input type="file" id="tep_sprite_goc" accept=".sprite3">
-        </div>
+        // Text song ngữ cho giao diện
+        const uiTexts = {
+            vi: {
+                step1_title: "Bước 1 - Nạp tệp tin Font (.ttf, .otf, .woff, .zip)",
+                step1_font_label: "Chọn kiểu Font:",
+                step2_title: "Bước 2 - Quản lý danh sách ký tự đóng gói",
+                step2_way1: "Cách 1: Chọn nhanh bảng chữ cái ngôn ngữ:",
+                step2_way2: "Cách 2: Dán văn bản/Lời thoại game mẫu (Tự lọc ký tự duy nhất):",
+                step2_way2_placeholder: "Dán đoạn văn, lời thoại game, hoặc câu bất kỳ vào đây... Hệ thống sẽ tự lọc ra danh sách chữ cái duy nhất",
+                step2_charmap: "Bảng ký tự có sẵn trong Font (Click để chèn nhanh):",
+                step2_charmap_empty: "Hãy nạp Font để hiển thị bản đồ ký tự...",
+                step2_final: "Chuỗi ký tự cuối cùng sẽ xuất bản:",
+                step3_title: "Bước 3 - Tùy biến kiểu & Xem trước kiểu chữ",
+                step3_color: "Màu sắc chữ:",
+                step3_stroke: "Bật viền ngoài",
+                step3_stroke_color: "Màu viền:",
+                step3_size: "Kích thước chữ (Size 4 - 512):",
+                step3_stroke_width: "Độ dày viền ngoài (0 - ",
+                step3_weight: "Độ béo nét chữ (Weight phụ: 0 - 10):",
+                step3_width: "Tỉ lệ rộng chữ (0.3 - 3.0):",
+                step3_align: "Chế độ căn tâm tọa độ:",
+                step3_align_baseline: "Căn theo dòng chữ (Baseline)",
+                step3_align_center: "Căn giữa hình chữ (Center Glyph)",
+                step3_align_box: "Căn giữa khung (Center Box)",
+                step3_preview: "Nhập chuỗi văn bản hiển thị thử:",
+                step4_title: "Bước 4 - Xuất bản sản phẩm",
+                step4_new: "Tạo mới tệp .Sprite3",
+                step4_modify: "Sửa đổi / Nối đuôi file .Sprite3 có sẵn",
+                step4_load_sprite: "Nạp tệp .sprite3 gốc cần bổ sung:",
+                step4_btn1: "1. Xuất danh sách độ rộng",
+                step4_btn2: "2. Tải về .Sprite3",
+                step4_btn3: "3. Tải về .Zip (Chứa SVG)",
+                step4_width_label: "Dữ liệu ma trận độ rộng ngang:",
+                status_no_font: "Chưa có font được chọn",
+                status_load_font: "Đang xử lý cấu trúc nhị phân Font...",
+                status_load_success: "Nạp font thành công!",
+                status_load_zip: "Đã nạp danh sách font từ file ZIP thành công!",
+                status_export_width: "Đã kết xuất ma trận độ rộng tương ứng!",
+                status_export_sprite: "Đã đóng gói file .Sprite3!",
+                status_export_zip: "Đã đóng gói font.zip chứa SVG!",
+                preview_default: "Preview"
+            },
+            en: {
+                step1_title: "Step 1 - Load Font File (.ttf, .otf, .woff, .zip)",
+                step1_font_label: "Select Font Style:",
+                step2_title: "Step 2 - Manage Character List",
+                step2_way1: "Way 1: Quick select language character set:",
+                step2_way2: "Way 2: Paste sample text/game dialogue (Auto-filter unique characters):",
+                step2_way2_placeholder: "Paste text, game dialogue, or any sentence here... System will automatically filter unique characters",
+                step2_charmap: "Available Characters in Font (Click to insert):",
+                step2_charmap_empty: "Load Font to display character map...",
+                step2_final: "Final character string to publish:",
+                step3_title: "Step 3 - Customize Style & Preview",
+                step3_color: "Text color:",
+                step3_stroke: "Enable outer stroke",
+                step3_stroke_color: "Stroke color:",
+                step3_size: "Font size (Size 4 - 512):",
+                step3_stroke_width: "Stroke width (0 -",
+                step3_weight: "Font weight (Weight: 0 - 10):",
+                step3_width: "Width scale (0.3 - 3.0):",
+                step3_align: "Alignment mode:",
+                step3_align_baseline: "Baseline alignment",
+                step3_align_center: "Center glyph alignment",
+                step3_align_box: "Center box alignment",
+                step3_preview: "Enter preview text:",
+                step4_title: "Step 4 - Export Product",
+                step4_new: "Create new .Sprite3 file",
+                step4_modify: "Modify / Append existing .Sprite3 file",
+                step4_load_sprite: "Load original .sprite3 file to append:",
+                step4_btn1: "1. Export width list",
+                step4_btn2: "2. Download .Sprite3",
+                step4_btn3: "3. Download .Zip (Contains SVG)",
+                step4_width_label: "Width matrix data:",
+                status_no_font: "No font selected",
+                status_load_font: "Processing font binary structure...",
+                status_load_success: "Font loaded successfully!",
+                status_load_zip: "Font list loaded from ZIP successfully!",
+                status_export_width: "Width matrix exported successfully!",
+                status_export_sprite: ".Sprite3 file packaged!",
+                status_export_zip: "font.zip with SVG packaged!",
+                preview_default: "Preview"
+            }
+        };
 
-        <div class="row" style="margin-top: 15px;">
-            <div>
-                <button onclick="xuat_danh_sach_do_rong()" class="btn-secondary">1. Xuất danh sách độ rộng</button>
-            </div>
-            <div>
-                <button onclick="bat_dau_xu_ly_sprite()">2. Tải về .Sprite3</button>
-            </div>
-        </div>
-        <button onclick="tao_sprite3_trong()" class="btn-dark">Tạo & Tải về file .Sprite3 TRỐNG hoàn toàn</button>
-
-        <div id="vung_ket_qua_text" style="display:none; margin-top:15px;">
-            <label style="font-weight:bold; color:#2ed573;">Dữ liệu ma trận độ rộng ngang:</label>
-            <textarea id="ket_qua_do_rong" class="output-box" readonly></textarea>
-        </div>
-    </div>
-
-    <div class="status" id="trang_thai_he_thong">Hệ thống đã cập nhật bản tối ưu 4.1!</div>
-</div>
-
-<script>
-    let kho_font_da_tai = {};
-    let url_font_preview = null;
-
-    const kho_ngon_ngu_mau = {
-        latin: "abcdefghijklmnopqrstuvwxyz!#$%\n\"&'()*+,-./0123456789:;<=>?@[\\\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        vietnamese: "abcdefghijklmnopqrstuvwxyz!#$%\n\"&'()*+,-./0123456789:;<=>?@[\\\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ",
-        korean: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ가나다라마바사아자차카타파하안녕하세요감사합니다대박",
-        japanese: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむメモヤユヨラリルレロ"
-    };
-
-    function doi_preset_ngon_ngu() {
-        const loai = document.getElementById('preset_ngon_ngu').value;
-        if (kho_ngon_ngu_mau[loai]) {
-            document.getElementById('van_ban_goc_mau').value = ''; // Reset văn bản mẫu
-            document.getElementById('danh_sach_ky_tu').value = kho_ngon_ngu_mau[loai];
+        function doi_ngon_ngu() {
+            currentLanguage = document.getElementById('language_selector').value;
+            cap_nhat_UI();
+            
+            // Re-render character map to fix layout issues when changing language
+            const ten_font = lay_ten_font_da_chon();
+            const font = kho_font_da_tai[ten_font];
+            if (font) {
+                ve_ban_do_ky_tu(font);
+            }
+            
+            // Re-render font style selection to update "Chọn kiểu Font:" label
+            cap_nhat_va_dung_giao_dien(false);
+            
+            // Re-run preview to reset page
             kich_hoat_preview();
         }
-    }
 
-    // MỚI: Hàm lọc ký tự duy nhất từ đoạn văn bản bất kỳ
-    function loc_ky_tu_tu_van_ban_mau() {
-        const van_ban = document.getElementById('van_ban_goc_mau').value;
-        if(!van_ban) return;
-        
-        // Loại bỏ các ký tự điều khiển xuống dòng, giữ lại các ký tự hiển thị được, lọc trùng bằng Set
-        const chuoi_sach = van_ban.replace(/[\r\n\t]/g, '');
-        const mang_duy_nhat = [...new Set(chuoi_sach.split(''))];
-        
-        document.getElementById('danh_sach_ky_tu').value = mang_duy_nhat.join('');
-        kich_hoat_preview();
-    }
-
-    // MỚI: Nạp chuỗi test nhanh cho Live Preview
-    function nap_chu_mau_preview(chuoi) {
-        document.getElementById('chuoi_preview').value = chuoi;
-        kich_hoat_preview();
-    }
-
-    function dong_bo_mau(nguon_id, dich_id) {
-        const gia_tri = document.getElementById(nguon_id).value;
-        if (nguon_id.includes('picker') || /^#([0-9A-F]{3}){1,2}$/i.test(gia_tri) || gia_tri.toLowerCase() === 'none') {
-            document.getElementById(dich_id).value = gia_tri;
-            kich_hoat_preview();
-        }
-    }
-
-    document.getElementsByName('che_do').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            document.getElementById('vung_chon_sprite').style.display = e.target.value === 'modify' ? 'block' : 'none';
-        });
-    });
-
-    function lay_ten_font_an_toan(font_obj) {
-        const ten_goc = font_obj.names.fontFamily?.en || Object.values(font_obj.names.fontFamily || {})[0] || "UnknownFont";
-        const kieu_goc = font_obj.names.fontSubfamily?.en || Object.values(font_obj.names.fontSubfamily || {})[0] || "Regular";
-        return `${ten_goc} - ${kieu_goc}`;
-    }
-
-    document.getElementById('tep_font_goc').addEventListener('change', async function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        kho_font_da_tai = {};
-        const ui_chon_kieu = document.getElementById('chon_kieu_font');
-        ui_chon_kieu.innerHTML = '';
-        document.getElementById('trang_thai_he_thong').innerText = "Đang xử lý cấu trúc nhị phân Font...";
-
-        if (file.name.toLowerCase().endsWith('.zip')) {
+        function cap_nhat_UI() {
+            const t = uiTexts[currentLanguage];
+            
             try {
-                const zip = await JSZip.loadAsync(file);
-                for (let filename in zip.files) {
-                    if (filename.match(/\.(ttf|otf|woff)$/i)) {
-                        const buffer = await zip.files[filename].async("arraybuffer");
-                        nap_font_tu_buffer(buffer);
-                    }
-                }
-                dung_bo_giao_dien_sau_tai();
-            } catch(zipErr) { alert("Lỗi đọc file ZIP: " + zipErr.message); }
-        } else {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                nap_font_tu_buffer(e.target.result);
-                if(url_font_preview) URL.revokeObjectURL(url_font_preview);
-                const blob = new Blob([e.target.result], {type: 'font/ttf'});
-                url_font_preview = URL.createObjectURL(blob);
+                // Update headings
+                const steps = document.querySelectorAll('.step h3');
+                if (steps[0]) steps[0].textContent = t.step1_title;
+                if (steps[1]) steps[1].textContent = t.step2_title;
+                if (steps[2]) steps[2].textContent = t.step3_title;
+                if (steps[3]) steps[3].textContent = t.step4_title;
                 
-                let style_preview = document.getElementById('id_font_preview_style');
-                if(!style_preview) {
-                    style_preview = document.createElement('style');
-                    style_preview.id = 'id_font_preview_style';
-                    document.head.appendChild(style_preview);
+                // Update Step 2 labels
+                const presetSelect = document.getElementById('preset_ngon_ngu');
+                if (presetSelect && presetSelect.previousElementSibling) {
+                    presetSelect.previousElementSibling.textContent = t.step2_way1;
                 }
-                style_preview.innerHTML = `@font-face { font-family: 'DynamicBicaFont'; src: url('${url_font_preview}'); }`;
-
-                dung_bo_giao_dien_sau_tai();
-            };
-            reader.readAsArrayBuffer(file);
-        }
-    });
-
-    function nap_font_tu_buffer(buffer) {
-        try {
-            const font_parse = opentype.parse(buffer);
-            let ten_font_goc = lay_ten_font_an_toan(font_parse);
-            let ten_font = ten_font_goc;
-            let dem = 1;
-            while (kho_font_da_tai[ten_font]) { 
-                ten_font = `${ten_font_goc} (${dem++})`; 
-            }
-    
-            // 1. Tạo tên font an toàn không chứa ký tự đặc biệt để làm font-family trong CSS
-            const safeName = "F_" + ten_font.replace(/[^a-zA-Z0-9]/g, '_');
-            font_parse._safeName = safeName;
-    
-            // 2. Tạo Blob URL từ buffer để trình duyệt có thể load font trực tiếp
-            const blob = new Blob([buffer], {type: 'font/ttf'});
-            font_parse._blobUrl = URL.createObjectURL(blob);
-    
-            // 3. Bơm thẻ style @font-face vào head để các item trong danh sách radio hiển thị đúng mặt chữ
-            let styleTag = document.getElementById('style_' + safeName);
-            if (!styleTag) {
-                styleTag = document.createElement('style');
-                styleTag.id = 'style_' + safeName;
-                styleTag.textContent = `@font-face { font-family: "${safeName}"; src: url("${font_parse._blobUrl}"); }`;
-                document.head.appendChild(styleTag);
-            }
-    
-            kho_font_da_tai[ten_font] = font_parse;
-        } catch(e) { 
-            console.log("Bỏ qua tệp hỏng.", e); 
-        }
-    }
-
-    function dung_bo_giao_dien_sau_tai() {
-        const container = document.getElementById('vung_chon_style');
-        if (!container) return;
-        
-        let html = `<label style="font-weight:bold; color:#aaa; display:block; margin-bottom:5px;">Chọn kiểu Font:</label>`;
-        html += `<div style="background:#1a1a22; border:1px solid #444; border-radius:6px; max-height:200px; overflow-y:auto; padding:5px;">`;
-        
-        for (let ten in kho_font_da_tai) {
-            const font = kho_font_da_tai[ten];
-            const safeName = font._safeName || "sans-serif";
-            
-            html += `
-                <label style="display:flex; align-items:center; padding:8px; cursor:pointer; border-bottom:1px solid #333;">
-                    <input type="radio" name="font_choice" value="${ten}" onchange="cap_nhat_font_hoat_dong()" style="margin-right:10px; transform:scale(1.2);">
-                    <span style="font-family:'${safeName}', sans-serif; font-size:16px; color:#fff;">ABCDEFGadcdefg - ${ten}</span>
-                </label>`;
-        }
-        html += `</div>`;
-        
-        container.innerHTML = html;
-        container.style.display = 'block';
-        
-        // Tự động chọn font đầu tiên trong danh sách vừa nạp
-        const firstRadio = container.querySelector('input[type="radio"]');
-        if (firstRadio) {
-            firstRadio.checked = true;
-            cap_nhat_font_hoat_dong();
-        }
-    }
-
-    function cap_nhat_font_hoat_dong() {
-        // 1. Đọc tên font từ radio đang được tick chọn
-        const selectedRadio = document.querySelector('input[name="font_choice"]:checked');
-        const ten_font = selectedRadio ? selectedRadio.value : Object.keys(kho_font_da_tai)[0];
-    
-        const font = kho_font_da_tai[ten_font];
-        if (!font) return;
-    
-        // 2. Áp dụng font chữ thật vào vùng preview hiển thị bằng CSS font-family
-        const vung_preview = document.getElementById('vung_hien_thi_preview');
-        if (vung_preview) {
-            vung_preview.style.fontFamily = `"${font._safeName}", sans-serif`;
-        }
-    
-        // 3. Giữ nguyên vẹn logic quét glyph và render map ký tự gốc của ông
-        const container_map = document.getElementById('char_map_visualizer');
-        container_map.innerHTML = '';
-    
-        let dem_hop_le = 0;
-        for (let i = 0; i < font.glyphs.length; i++) {
-            const glyph = font.glyphs.get(i);
-            if (glyph.unicode) {
-                const ky_tu = String.fromCharCode(glyph.unicode);
-                const o_chu = document.createElement('div');
-                o_chu.className = 'char-item';
-                o_chu.textContent = ky_tu;
-                o_chu.onclick = () => {
-                    const txt = document.getElementById('danh_sach_ky_tu');
-                    txt.value += ky_tu;
-                    kich_hoat_preview();
+                
+                // Update dropdown options text
+                const presetOptions = presetSelect ? presetSelect.querySelectorAll('option') : [];
+                const langNames = {
+                    vi: {
+                        vietnamese: "Tiếng Việt",
+                        latin: "Latin Cơ Bản",
+                        turkish: "Tiếng Thổ Nhĩ Kì",
+                        portuguese: "Tiếng Bồ Đào Nha",
+                        spanish: "Tiếng Tây Ban Nha (Español)",
+                        german: "Tiếng Đức (Deutsch)",
+                        russian: "Tiếng Nga (Cyrillic)",
+                        french: "Tiếng Pháp",
+                        greek: "Tiếng Hy Lạp (Greek)",
+                        polish: "Tiếng Ba Lan (Polish)",
+                        czech: "Tiếng Séc (Czech)",
+                        swedish: "Tiếng Thụy Điển (Swedish)",
+                        norwegian: "Tiếng Na Uy (Norwegian)",
+                        danish: "Tiếng Đan Mạch (Danish)",
+                        romanian: "Tiếng Rumani (Romanian)",
+                        hungarian: "Tiếng Hungary (Hungarian)",
+                        croatian: "Tiếng Croatia (Croatian)",
+                        serbian: "Tiếng Serbia (Serbian)",
+                        ukrainian: "Tiếng Ukraina (Ukrainian)"
+                    },
+                    en: {
+                        vietnamese: "Vietnamese",
+                        latin: "Latin Basic",
+                        turkish: "Turkish",
+                        portuguese: "Portuguese",
+                        spanish: "Spanish (Español)",
+                        german: "German (Deutsch)",
+                        russian: "Russian (Cyrillic)",
+                        french: "French",
+                        greek: "Greek",
+                        polish: "Polish",
+                        czech: "Czech",
+                        swedish: "Swedish",
+                        norwegian: "Norwegian",
+                        danish: "Danish",
+                        romanian: "Romanian",
+                        hungarian: "Hungarian",
+                        croatian: "Croatian",
+                        serbian: "Serbian",
+                        ukrainian: "Ukrainian"
+                    }
                 };
-                container_map.appendChild(o_chu);
-                dem_hop_le++;
-            }
-        }
-        document.getElementById('trang_thai_he_thong').innerText = `Đã nạp xong bộ font. Quét được ${dem_hop_le} ký tự khả dụng!`;
-        
-        // Gọi preview cập nhật lại text
-        kich_hoat_preview();
-    }
-
-    function kich_hoat_preview() {
-        const vung_view = document.getElementById('vung_hien_thi_preview');
-        const chuoi_test = document.getElementById('chuoi_preview').value || "Preview";
-    
-        // =============================
-        // 1. SAFE GET VALUE
-        // =============================
-        const size_chu = Math.min(
-            Math.max(parseInt(document.getElementById('kich_thuoc_chu').value) || 64, 4),
-            512
-        );
-    
-        const mau_chu = document.getElementById('mau_chu').value;
-        const mau_vien = document.getElementById('mau_vien').value;
-    
-        const do_day_vien = Math.min(
-            Math.max(parseFloat(document.getElementById('do_day_vien').value) || 0, 0),
-            15
-        );
-    
-        const do_day_weight = Math.min(
-            Math.max(parseFloat(document.getElementById('do_day_weight').value) || 0, 0),
-            10
-        );
-    
-        const ti_le_width = Math.min(
-            Math.max(parseFloat(document.getElementById('ti_le_width').value) || 1.0, 0.3),
-            3.0
-        );
-    
-        // =============================
-        // 2. GET FONT
-        // =============================
-        const ten_font = document.getElementById('chon_kieu_font').value;
-        const font = kho_font_da_tai[ten_font];
-    
-        if (!font) {
-            vung_view.textContent = "Chưa có font được chọn";
-            return;
-        }
-    
-        // =============================
-        // 3. INJECT FONT (NO FLICKER)
-        // =============================
-        const font_url = font._blobUrl;
-    
-        if (font_url) {
-            let styleTag = document.getElementById('dynamic_font_face');
-    
-            if (!styleTag) {
-                styleTag = document.createElement('style');
-                styleTag.id = 'dynamic_font_face';
-                document.head.appendChild(styleTag);
-            }
-    
-            // Chỉ update nếu đổi URL → tránh flicker
-            if (styleTag.dataset.currentUrl !== font_url) {
-                styleTag.dataset.currentUrl = font_url;
-    
-                styleTag.textContent = `
-                    @font-face {
-                        font-family: "DynamicBicaFont";
-                        src: url("${font_url}");
-                        font-display: swap;
-                    }
-                `;
-            }
-        }
-    
-        // =============================
-        // 4. APPLY TEXT STYLE
-        // =============================
-        vung_view.style.fontFamily = '"DynamicBicaFont", sans-serif';
-        vung_view.textContent = chuoi_test;
-        vung_view.style.fontSize = `${size_chu}px`;
-        vung_view.style.color = mau_chu;
-    
-        // width scaling giả lập
-        vung_view.style.transform = `scaleX(${ti_le_width})`;
-    
-        // weight giả lập (nếu font không variable)
-        if (do_day_weight > 0) {
-            vung_view.style.fontWeight = Math.min(900, 400 + do_day_weight * 100);
-        }
-    
-        // =============================
-        // 5. BORDER / STROKE FIX
-        // =============================
-        if (mau_vien !== 'none' && do_day_vien > 0) {
-            vung_view.style.webkitTextStroke = `${do_day_vien}px ${mau_vien}`;
-    
-            // shadow bổ trợ để viền “nở” hơn
-            vung_view.style.textShadow = `
-                1px 0 ${mau_vien},
-                -1px 0 ${mau_vien},
-                0 1px ${mau_vien},
-                0 -1px ${mau_vien}
-            `;
-        } else {
-            vung_view.style.webkitTextStroke = 'unset';
-            vung_view.style.textShadow = 'none';
-        }
-    }
-
-    function xuat_danh_sach_do_rong() {
-        try {
-            const ten_kieu_da_chon = document.getElementById('chon_kieu_font').value;
-            const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
-            if (!font_hoat_dong) return alert("Vui lòng nạp Font chữ trước!");
-
-            const size_chu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
-            const ti_le_scale = size_chu / font_hoat_dong.unitsPerEm;
-            const ti_le_width = parseFloat(document.getElementById('ti_le_width').value) || 1.0;
-            const do_day_weight = parseFloat(document.getElementById('do_day_weight').value) || 0;
-            const do_day_vien = parseFloat(document.getElementById('do_day_vien').value) || 0;
-            const phan_dem_vien = do_day_vien + do_day_weight;
-
-            const danh_sach_chu = document.getElementById('danh_sach_ky_tu').value;
-            let chuoi_ket_qua = danh_sach_chu + "\n";
-
-            for (let i = 0; i < danh_sach_chu.length; i++) {
-                const ky_tu = danh_sach_chu[i];
-                if (ky_tu === '\n' || ky_tu === '\r') continue;
-
-                const glyph = font_hoat_dong.charToGlyph(ky_tu);
-                const do_rong_goc = glyph.advanceWidth !== undefined ? glyph.advanceWidth : font_hoat_dong.unitsPerEm;
-                const do_rong_ngang = (do_rong_goc * ti_le_scale * ti_le_width) + phan_dem_vien;
-                chuoi_ket_qua += do_rong_ngang + "\n";
-            }
-
-            document.getElementById('ket_qua_do_rong').value = chuoi_ket_qua;
-            document.getElementById('vung_ket_qua_text').style.display = 'block';
-            document.getElementById('trang_thai_he_thong').innerText = "Đã kết xuất ma trận độ rộng tương ứng!";
-        } catch (error) { alert("Lỗi: " + error.message); }
-    }
-
-    const bo_loc_ten_sheep = { "/": "slash", "\\": "backslash", ":": "colon", "*": "asterisk", "?": "question", '"': "quote", "<": "less_than", ">": "greater_than", "|": "pipe", " ": "space", "\n": "newline", "\t": "tab", ".": "dot" };
-
-    async function bat_dau_xu_ly_sprite() {
-        try {
-            const ten_kieu_da_chon = document.getElementById('chon_kieu_font').value;
-            const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
-            if (!font_hoat_dong) return alert("Vui lòng nạp Font chữ!");
-
-            const mau_chu = document.getElementById('mau_chu').value.trim();
-            const mau_vien = document.getElementById('mau_vien').value.trim();
-            const co_vien = mau_vien.toLowerCase() !== 'none';
-            
-            const size_chu = Math.min(Math.max(parseInt(document.getElementById('kich_thuoc_chu').value) || 64, 4), 512);
-            const do_day_vien = Math.min(Math.max(parseFloat(document.getElementById('do_day_vien').value) || 0, 0), 15);
-            const do_day_weight = Math.min(Math.max(parseFloat(document.getElementById('do_day_weight').value) || 0, 0), 10);
-            const ti_le_width = Math.min(Math.max(parseFloat(document.getElementById('ti_le_width').value) || 1.0, 0.3), 3.0);
-            
-            const danh_sach_chu = document.getElementById('danh_sach_ky_tu').value;
-            const loai_can_tam = document.querySelector('input[name="loai_can_tam"]:checked').value;
-            const che_do_sua = document.querySelector('input[name="che_do"]:checked').value === 'modify';
-
-            let zip_xuat = new JSZip();
-            let du_lieu_costume = [];
-
-            const ti_le_scale = size_chu / font_hoat_dong.unitsPerEm;
-            const phan_dem_vien = do_day_vien + do_day_weight;
-            
-            const ascender_thuc = font_hoat_dong.ascender * ti_le_scale;
-            const descender_thuc = font_hoat_dong.descender * ti_le_scale;
-            const chieu_cao_an_toan = (ascender_thuc - descender_thuc) + phan_dem_vien; 
-
-            const mang_ky_tu_duy_nhat = [...new Set(danh_sach_chu.split(''))];
-
-            for (let ky_tu of mang_ky_tu_duy_nhat) {
-                if (ky_tu === '\n' || ky_tu === '\r') continue;
-
-                const glyph = font_hoat_dong.charToGlyph(ky_tu);
-                const do_rong_goc = glyph.advanceWidth !== undefined ? glyph.advanceWidth : font_hoat_dong.unitsPerEm;
-                let do_rong_ngang_thuc = do_rong_goc * ti_le_scale * ti_le_width;
-                if (do_rong_ngang_thuc <= 0) continue;
-
-                const do_rong_khung = do_rong_ngang_thuc + phan_dem_vien;
-                const dich_x = phan_dem_vien / 2;
-                const dich_y = ascender_thuc + (phan_dem_vien / 2);
-
-                const bbox_goc = glyph.getBoundingBox();
-                const path = glyph.getPath(0, dich_y, size_chu);
-                const svgPathData = path.toPathData(2);
-                if (!svgPathData) continue;
-
-                let logic_net_chu = '';
-                if (co_vien && do_day_vien > 0) {
-                    logic_net_chu += `<path d="${svgPathData}" fill="${mau_chu}" stroke="${mau_vien}" stroke-width="${do_day_vien + do_day_weight}" stroke-linejoin="round" />`;
-                }
-                let attr_weight = do_day_weight > 0 ? `stroke="${mau_chu}" stroke-width="${do_day_weight}" stroke-linejoin="round"` : '';
-                logic_net_chu += `<path d="${svgPathData}" fill="${mau_chu}" ${attr_weight} />`;
-
-                const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${do_rong_khung}" height="${chieu_cao_an_toan}" viewBox="0 0 ${do_rong_khung} ${chieu_cao_an_toan}"><g transform="translate(${dich_x}, 0) scale(${ti_le_width}, 1)">${logic_net_chu}</g></svg>`;
-
-                let tam_x = do_rong_khung / 2;
-                let tam_y = chieu_cao_an_toan / 2;
-
-                if (loai_can_tam === 'baseline') {
-                    tam_x = do_rong_khung / 2;
-                    tam_y = dich_y; 
-                } else if (loai_can_tam === 'center') {
-                    tam_x = ((((bbox_goc.x1 + bbox_goc.x2) / 2) * ti_le_scale) * ti_le_width) + dich_x;
-                    tam_y = dich_y - (((bbox_goc.y1 + bbox_goc.y2) / 2) * ti_le_scale);
-                }
-
-                let ten_tep_co_so = bo_loc_ten_sheep[ky_tu] || ky_tu;
-                ten_tep_co_so = ten_tep_co_so.replace(/[<>:"/\\|?*\x00-\x1F]/g, "_");
                 
-                const md5_hash = SparkMD5.hash(svgContent);
-                zip_xuat.file(`${md5_hash}.svg`, svgContent);
-                du_lieu_costume.push({
-                    "name": ten_tep_co_so, "bitmapResolution": 1, "dataFormat": "svg",
-                    "assetId": md5_hash, "md5ext": `${md5_hash}.svg`,
-                    "rotationCenterX": tam_x, "rotationCenterY": tam_y
+                presetOptions.forEach(option => {
+                    const langKey = option.value;
+                    if (langNames[currentLanguage][langKey]) {
+                        option.textContent = langNames[currentLanguage][langKey];
+                    }
+                });
+                
+                const vanBanMau = document.getElementById('van_ban_goc_mau');
+                if (vanBanMau) {
+                    if (vanBanMau.previousElementSibling) {
+                        vanBanMau.previousElementSibling.textContent = t.step2_way2;
+                    }
+                    vanBanMau.placeholder = t.step2_way2_placeholder;
+                }
+                
+                const charMap = document.getElementById('char_map_visualizer');
+                if (charMap && charMap.previousElementSibling) {
+                    charMap.previousElementSibling.textContent = t.step2_charmap;
+                }
+                
+                // Update char map empty text
+                const charMapEmpty = charMap ? charMap.querySelector('div') : null;
+                if (charMapEmpty) {
+                    charMapEmpty.textContent = t.step2_charmap_empty;
+                }
+                
+                const danhSachKyTu = document.getElementById('danh_sach_ky_tu');
+                if (danhSachKyTu && danhSachKyTu.previousElementSibling) {
+                    danhSachKyTu.previousElementSibling.textContent = t.step2_final;
+                }
+                
+                // Update Step 3 labels safely
+                const mauChu = document.getElementById('mau_chu');
+                if (mauChu && mauChu.parentElement) {
+                    const label = mauChu.parentElement.querySelector('label');
+                    if (label && label.childNodes.length > 0) {
+                        // Only update text node, preserve other elements
+                        for (let node of label.childNodes) {
+                            if (node.nodeType === Node.TEXT_NODE) {
+                                node.textContent = t.step3_color;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // Update checkbox label safely
+                const coVienLabel = document.getElementById('co_vien_label');
+                if (coVienLabel) {
+                    coVienLabel.textContent = t.step3_stroke;
+                }
+                
+                // Update stroke color label safely
+                const mauVienLabel = document.getElementById('mau_vien_label');
+                if (mauVienLabel) {
+                    mauVienLabel.textContent = t.step3_stroke_color;
+                }
+                
+                const kichThuocChu = document.getElementById('kich_thuoc_chu');
+                if (kichThuocChu && kichThuocChu.previousElementSibling) {
+                    kichThuocChu.previousElementSibling.textContent = t.step3_size;
+                }
+                
+                const doDayVien = document.getElementById('do_day_vien');
+                if (doDayVien && doDayVien.previousElementSibling) {
+                    const maxDisplay = document.getElementById('max_stroke_display');
+                    const maxVal = maxDisplay ? maxDisplay.textContent : '8';
+                    doDayVien.previousElementSibling.innerHTML = t.step3_stroke_width + `<span id="max_stroke_display">${maxVal}</span>):`;
+                }
+                
+                const doDayWeight = document.getElementById('do_day_weight');
+                if (doDayWeight && doDayWeight.previousElementSibling) {
+                    doDayWeight.previousElementSibling.textContent = t.step3_weight;
+                }
+                
+                const tiLeWidth = document.getElementById('ti_le_width');
+                if (tiLeWidth && tiLeWidth.previousElementSibling) {
+                    tiLeWidth.previousElementSibling.textContent = t.step3_width;
+                }
+                
+                // Update alignment label (Chế độ căn tâm tọa độ)
+                const alignLabel = document.querySelector('.split-left label[style*="font-weight:bold"]');
+                if (alignLabel) {
+                    alignLabel.textContent = t.step3_align;
+                }
+                
+                // Update alignment radio labels
+                const alignBaseline = document.getElementById('align_baseline');
+                if (alignBaseline && alignBaseline.parentElement) {
+                    const label = alignBaseline.parentElement.querySelector('label');
+                    if (label) label.textContent = t.step3_align_baseline;
+                }
+                
+                const alignCenter = document.getElementById('align_center');
+                if (alignCenter && alignCenter.parentElement) {
+                    const label = alignCenter.parentElement.querySelector('label');
+                    if (label) label.textContent = t.step3_align_center;
+                }
+                
+                const alignDefault = document.getElementById('align_default');
+                if (alignDefault && alignDefault.parentElement) {
+                    const label = alignDefault.parentElement.querySelector('label');
+                    if (label) label.textContent = t.step3_align_box;
+                }
+                
+                const chuoiPreview = document.getElementById('chuoi_preview');
+                if (chuoiPreview && chuoiPreview.previousElementSibling) {
+                    chuoiPreview.previousElementSibling.textContent = t.step3_preview;
+                }
+                
+                // Update Step 4 labels
+                const cheDoTaoMoi = document.getElementById('che_do_tao_moi');
+                if (cheDoTaoMoi && cheDoTaoMoi.parentElement) {
+                    const label = cheDoTaoMoi.parentElement.querySelector('label');
+                    if (label) label.textContent = t.step4_new;
+                }
+                
+                const cheDoSua = document.getElementById('che_do_sua');
+                if (cheDoSua && cheDoSua.parentElement) {
+                    const label = cheDoSua.parentElement.querySelector('label');
+                    if (label) label.textContent = t.step4_modify;
+                }
+                
+                const tepSpriteGoc = document.getElementById('tep_sprite_goc');
+                if (tepSpriteGoc && tepSpriteGoc.previousElementSibling) {
+                    tepSpriteGoc.previousElementSibling.textContent = t.step4_load_sprite;
+                }
+                
+                const btnSecondary = document.querySelector('.btn-secondary');
+                if (btnSecondary) {
+                    btnSecondary.textContent = t.step4_btn1;
+                }
+                
+                // Update button "2. Tải về .Sprite3" by finding button with onclick="bat_dau_xu_ly_sprite()"
+                const btnSprite = document.querySelector('button[onclick="bat_dau_xu_ly_sprite()"]');
+                if (btnSprite) {
+                    btnSprite.textContent = t.step4_btn2;
+                }
+                
+                const btnCyan = document.querySelector('.btn-cyan');
+                if (btnCyan) {
+                    btnCyan.textContent = t.step4_btn3;
+                }
+                
+                const ketQuaDoRong = document.getElementById('ket_qua_do_rong');
+                if (ketQuaDoRong && ketQuaDoRong.previousElementSibling) {
+                    ketQuaDoRong.previousElementSibling.textContent = t.step4_width_label;
+                }
+                
+                // Update preview default text if empty
+                const previewInput = document.getElementById('chuoi_preview');
+                if (previewInput) {
+                    if (previewInput.value === 'Preview' || previewInput.value === '') {
+                        previewInput.value = t.preview_default;
+                    }
+                }
+                
+                // Update preview "no font" text
+                const vungView = document.getElementById('vung_hien_thi_preview');
+                if (vungView && vungView.textContent === t.status_no_font) {
+                    vungView.textContent = t.status_no_font;
+                }
+            } catch (error) {
+                console.error("Error updating UI text:", error);
+            }
+        }
+
+        const kho_ngon_ngu_mau = {
+            latin:      chuoi_base,
+            vietnamese: chuoi_base + "àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ",
+            spanish:    chuoi_base + "áéíóúüñÁÉÍÓÚÜÑ¿¡",
+            german:     chuoi_base + "äöüßÄÖÜẞé",
+            russian:    chuoi_base + "абвгдеёжзийклmнопрствуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ",
+            greek:      chuoi_base + "αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚλμνξοπρστυφχψωάέήίόύώϊϋΐΰΆΈΉΊΌΎΏ",
+            french:     chuoi_base + "éèàùçâêîôûëïüÿÀÉÈÇÂÊÎÔÛËÏÜŸæœÆŒ",
+            portuguese: chuoi_base + "áâãàçéêíóôõúÁÂÃÀÇÉÊÍÓÔÕÚ",
+            turkish:    chuoi_base + "çğıİöşüÇĞÖŞÜ",
+            polish:     chuoi_base + "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ",
+            czech:      chuoi_base + "áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ",
+            swedish:    chuoi_base + "åäöÅÄÖ",
+            norwegian:  chuoi_base + "åæøÅÆØ",
+            danish:     chuoi_base + "åæøÅÆØ",
+            romanian:   chuoi_base + "ăâîșțĂÂÎȘȚ",
+            hungarian:  chuoi_base + "áéíóöőúüűÁÉÍÓÖŐÚÜŰ",
+            croatian:   chuoi_base + "čćđšžČĆĐŠŽ",
+            serbian:    chuoi_base + "čćđšžČĆĐŠŽ",
+            ukrainian:  chuoi_base + "абвгдеёжзийклмнопрствуфхцчшщъыьэюяґєіїАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯҐЄІЇ"
+        };
+
+        function doi_preset_ngon_ngu() {
+            const loai = document.getElementById('preset_ngon_ngu').value;
+            if (kho_ngon_ngu_mau[loai]) {
+                document.getElementById('van_ban_goc_mau').value = '';
+                document.getElementById('danh_sach_ky_tu').value = kho_ngon_ngu_mau[loai];
+                kich_hoat_preview();
+            }
+        }
+
+        function loc_ky_tu_tu_van_ban_mau() {
+            const van_ban = document.getElementById('van_ban_goc_mau').value;
+            if (!van_ban) return;
+
+            const chuoi_sach = van_ban.replace(/[\r\n\t]/g, '');
+            const mang_duy_nhat = [...new Set(chuoi_sach.split(''))];
+
+            document.getElementById('danh_sach_ky_tu').value = mang_duy_nhat.join('');
+            kich_hoat_preview();
+        }
+
+        function toggle_vien() {
+            const checkbox = document.getElementById('co_vien_checkbox');
+            if (!checkbox) return;
+            
+            const dang_bat = checkbox.checked;
+            
+            // Bật/tắt khả năng tương tác
+            const mauVien = document.getElementById('mau_vien');
+            const pickerMauVien = document.getElementById('picker_mau_vien');
+            const doDayVien = document.getElementById('do_day_vien');
+            const vungChonMauVien = document.getElementById('vung_chon_mau_vien');
+            
+            if (mauVien) mauVien.disabled = !dang_bat;
+            if (pickerMauVien) pickerMauVien.disabled = !dang_bat;
+            if (doDayVien) doDayVien.disabled = !dang_bat;
+            
+            // Tăng giảm độ mờ để UI phản hồi trực quan (xám đi)
+            const do_mo = dang_bat ? '1' : '0.4';
+            if (vungChonMauVien) vungChonMauVien.style.opacity = do_mo;
+            if (doDayVien) doDayVien.style.opacity = do_mo;
+            
+            kich_hoat_preview();
+        }
+
+        function dong_bo_mau(nguon_id, dich_id) {
+            const gia_tri = document.getElementById(nguon_id).value;
+            if (nguon_id.includes('picker') || /^#([0-9A-F]{3}){1,2}$/i.test(gia_tri) || gia_tri.toLowerCase() === 'none') {
+                document.getElementById(dich_id).value = gia_tri;
+                kich_hoat_preview();
+            }
+        }
+
+        document.getElementsByName('che_do').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                document.getElementById('vung_chon_sprite').style.display = e.target.value === 'modify' ? 'block' : 'none';
+            });
+        });
+
+        // Initialize UI text when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            cap_nhat_UI();
+        });
+
+        function lay_ten_font_an_toan(font_obj) {
+            const ten_goc = font_obj.names.fontFamily?.en || Object.values(font_obj.names.fontFamily || {})[0] || "UnknownFont";
+            const kieu_goc = font_obj.names.fontSubfamily?.en || Object.values(font_obj.names.fontSubfamily || {})[0] || "Regular";
+            return `${ten_goc} - ${kieu_goc}`;
+        }
+
+        function lay_ten_font_da_chon() {
+            const selectedRadio = document.querySelector('input[name="font_choice"]:checked');
+            return selectedRadio ? selectedRadio.value : Object.keys(kho_font_da_tai)[0];
+        }
+
+        function nap_font_tu_buffer(buffer) {
+            try {
+                const font_parse = opentype.parse(buffer);
+                let ten_font_goc = lay_ten_font_an_toan(font_parse);
+                let ten_font = ten_font_goc;
+                let dem = 1;
+                while (kho_font_da_tai[ten_font]) {
+                    ten_font = `${ten_font_goc} (${dem++})`;
+                }
+
+                const safeName = "F_" + ten_font.replace(/[^a-zA-Z0-9]/g, '_');
+                font_parse._safeName = safeName;
+
+                const blob = new Blob([buffer], { type: 'font/ttf' });
+                font_parse._blobUrl = URL.createObjectURL(blob);
+
+                let styleTag = document.getElementById('style_' + safeName);
+                if (!styleTag) {
+                    styleTag = document.createElement('style');
+                    styleTag.id = 'style_' + safeName;
+                    styleTag.textContent = `@font-face { font-family: "${safeName}"; src: url("${font_parse._blobUrl}"); }`;
+                    document.head.appendChild(styleTag);
+                }
+
+                kho_font_da_tai[ten_font] = font_parse;
+                return true;
+            } catch (e) {
+                console.error("Lỗi phân tích cú pháp Font:", e);
+                return false;
+            }
+        }
+
+        document.getElementById('tep_font_goc').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            kho_font_da_tai = {};
+            document.getElementById('trang_thai_he_thong').innerText = "Đang xử lý cấu trúc nhị phân Font...";
+
+            const ten_file_low = file.name.toLowerCase();
+
+            if (!ten_file_low.endsWith('.zip') && (ten_file_low.includes('variable') || ten_file_low.includes('vf'))) {
+                document.getElementById('trang_thai_he_thong').innerText = "Lỗi: Hệ thống hiện tại ưu tiên font tĩnh (Static)!";
+                alert("File này là font Variable. Để hiển thị chính xác nhất trên Scratch, vui lòng nạp font tĩnh lẻ hoặc file .zip chứa thư mục static nhé!");
+                return;
+            }
+
+            if (ten_file_low.endsWith('.zip')) {
+                try {
+                    const zip = await JSZip.loadAsync(file);
+                    let co_font_hop_le = false;
+                    let co_thu_muc_static = false;
+                    
+                    for (let filename in zip.files) {
+                        if (filename.toLowerCase().includes('static/') && filename.match(/\.(ttf|otf|woff)$/i)) {
+                            co_thu_muc_static = true;
+                            break;
+                        }
+                    }
+
+                    let dem_file_loai_bo = 0;
+
+                    for (let filename in zip.files) {
+                        const filename_low = filename.toLowerCase();
+                        if (filename_low.match(/\.(ttf|otf|woff)$/i) && !filename_low.includes('__macosx')) {
+                            if (co_thu_muc_static) {
+                                if (!filename_low.includes('static/')) {
+                                    dem_file_loai_bo++;
+                                    continue;
+                                }
+                            } else {
+                                if (filename_low.includes('variable') || filename_low.includes('vf')) {
+                                    dem_file_loai_bo++;
+                                    continue;
+                                }
+                            }
+
+                            const buffer = await zip.files[filename].async("arraybuffer");
+                            if (nap_font_tu_buffer(buffer)) {
+                                co_font_hop_le = true;
+                            }
+                        }
+                    }
+
+                    if (co_font_hop_le) {
+                        cap_nhat_va_dung_giao_dien(true);
+                        let thong_bao = "Đã nạp danh sách font từ file ZIP thành công!";
+                        if (co_thu_muc_static) {
+                            thong_bao += " (Phát hiện cấu trúc Google Fonts: Đã lấy thư mục /static).";
+                        } else if (dem_file_loai_bo > 0) {
+                            thong_bao += ` (Đã lọc bỏ ${dem_file_loai_bo} file Variable).`;
+                        }
+                        document.getElementById('trang_thai_he_thong').innerText = thong_bao;
+                    } else {
+                        document.getElementById('trang_thai_he_thong').innerText = "Lỗi: Không tìm thấy font tĩnh hợp lệ!";
+                        alert("Không tìm thấy tệp font định dạng tĩnh nào hợp lệ bên trong file ZIP.");
+                    }
+                } catch (zipErr) {
+                    document.getElementById('trang_thai_he_thong').innerText = "Lỗi đọc file ZIP: " + zipErr.message;
+                    alert("Lỗi đọc file ZIP: " + zipErr.message);
+                }
+            } else {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const thanh_cong = nap_font_tu_buffer(e.target.result);
+                    if (!thanh_cong) {
+                        document.getElementById('trang_thai_he_thong').innerText = "Lỗi: Định dạng font không hỗ trợ!";
+                        alert("Không thể đọc được file Font này!");
+                        return;
+                    }
+                    
+                    if (url_font_preview) URL.revokeObjectURL(url_font_preview);
+                    const blob = new Blob([e.target.result], { type: 'font/ttf' });
+                    url_font_preview = URL.createObjectURL(blob);
+
+                    let style_preview = document.getElementById('id_font_preview_style');
+                    if (!style_preview) {
+                        style_preview = document.createElement('style');
+                        style_preview.id = 'id_font_preview_style';
+                        document.head.appendChild(style_preview);
+                    }
+                    style_preview.innerHTML = `@font-face { font-family: 'DynamicBicaFont'; src: url('${url_font_preview}'); }`;
+
+                    cap_nhat_va_dung_giao_dien(true);
+                    document.getElementById('trang_thai_he_thong').innerText = "Nạp font thành công!";
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        });
+
+        function cap_nhat_va_dung_giao_dien(tai_lai_danh_sach = false) {
+            const container = document.getElementById('vung_chon_style');
+            if (!container) return;
+
+            if (tai_lai_danh_sach) {
+                const t = uiTexts[currentLanguage];
+                let html = `<label style="font-weight:bold; color:#aaa; display:block; margin-bottom:5px;">${t.step1_font_label}</label>`;
+                html += `<div style="background:#1a1a22; border:1px solid #444; border-radius:6px; max-height:200px; overflow-y:auto; padding:5px;">`;
+
+                for (let ten in kho_font_da_tai) {
+                    const font = kho_font_da_tai[ten];
+                    const safeName = font._safeName || "sans-serif";
+                    html += `
+                    <label style="display:flex; align-items:center; padding:8px; cursor:pointer; border-bottom:1px solid #333;">
+                        <input type="radio" name="font_choice" value="${ten}" onchange="cap_nhat_va_dung_giao_dien(false)" style="margin-right:10px; transform:scale(1.2);">
+                        <span style="font-family:'${safeName}', sans-serif; font-size:16px; color:#fff;">ABCDEFGadcdefg - ${ten}</span>
+                    </label>`;
+                }
+                html += `</div>`;
+                container.innerHTML = html;
+                container.style.display = 'block';
+
+                const firstRadio = container.querySelector('input[type="radio"]');
+                if (firstRadio) firstRadio.checked = true;
+            }
+
+            const ten_font = lay_ten_font_da_chon();
+            const font = kho_font_da_tai[ten_font];
+            if (!font) return;
+
+            const vung_preview = document.getElementById('vung_hien_thi_preview');
+            if (vung_preview) {
+                vung_preview.style.fontFamily = `"${font._safeName}", sans-serif`;
+            }
+
+            // Dựng bản đồ kí tự
+            ve_ban_do_ky_tu(font);
+
+            // Kiểm tra và disable các ngôn ngữ không được hỗ trợ
+            kiem_tra_ho_tro_ngon_ngu(font);
+
+            // Chạy vẽ preview
+            kich_hoat_preview();
+        }
+
+        function kiem_tra_ho_tro_ngon_ngu(font) {
+            if (!font) return;
+
+            // Lấy danh sách ký tự có trong font
+            const fontChars = new Set();
+            for (let i = 0; i < font.glyphs.length; i++) {
+                const glyph = font.glyphs.get(i);
+                if (glyph.unicode) {
+                    fontChars.add(String.fromCharCode(glyph.unicode));
+                }
+            }
+
+            // Kiểm tra từng ngôn ngữ
+            const select = document.getElementById('preset_ngon_ngu');
+            const options = select.querySelectorAll('option');
+
+            options.forEach(option => {
+                const langKey = option.value;
+                const langChars = kho_ngon_ngu_mau[langKey];
+                
+                if (langChars) {
+                    // Kiểm tra xem font có chứa ít nhất 80% ký tự của ngôn ngữ không
+                    let supportedCount = 0;
+                    for (let char of langChars) {
+                        if (fontChars.has(char)) {
+                            supportedCount++;
+                        }
+                    }
+                    
+                    const supportRatio = supportedCount / langChars.length;
+                    // Disable nếu hỗ trợ dưới 80%
+                    option.disabled = supportRatio < 0.8;
+                }
+            });
+        }
+
+        function ve_ban_do_ky_tu(font) {
+            // 1. BIẾN NỘI BỘ (LOCAL STATE) CHO BẢN ĐỒ KÝ TỰ
+            let danh_sach_ky_tu_map = [];
+            let page_hien_tai = 0;
+            const SO_O_MOI_PAGE = 92; // Cố định 92 ô mỗi trang (CSS grid sẽ tự động điều chỉnh số cột/hàng)
+
+            // 2. KHỞI TẠO VÀ LỌC DỮ LIỆU FONT
+            if (!font) return;
+
+            for (let i = 0; i < font.glyphs.length; i++) {
+                const glyph = font.glyphs.get(i);
+                if (glyph.unicode) {
+                    danh_sach_ky_tu_map.push(String.fromCharCode(glyph.unicode));
+                }
+            }
+
+            // 3. HÀM CON: CẬP NHẬT SỐ TRANG HIỂN THỊ (X / Y)
+            function cap_nhat_page_text() {
+                const tong_page = Math.max(1, Math.ceil(danh_sach_ky_tu_map.length / SO_O_MOI_PAGE));
+                const text = document.getElementById('char_map_page_text');
+                if (text) {
+                    text.innerText = `${page_hien_tai + 1} / ${tong_page}`;
+                }
+            }
+
+            // 4. HÀM CON: CẬP NHẬT MÀU SẮC CÁC Ô KÝ TỰ
+            function update_char_colors() {
+                const txt = document.getElementById('danh_sach_ky_tu');
+                if (!txt) return;
+                
+                const currentString = txt.value;
+                const charItems = document.querySelectorAll('.char-item');
+                
+                charItems.forEach(item => {
+                    const char = item.innerHTML;
+                    if (char && char !== '&nbsp;') {
+                        if (currentString.includes(char)) {
+                            item.classList.add('char-disabled');
+                        } else {
+                            item.classList.remove('char-disabled');
+                        }
+                    }
                 });
             }
 
-            let cau_truc_sprite = mien_cau_truc_goc();
+            // 5. HÀM CON: RENDER HÌNH ẢNH CÁC Ô KÝ TỰ
+            function render_page_ky_tu() {
+                const container_map = document.getElementById('char_map_visualizer');
+                if (!container_map) return;
 
-            if (che_do_sua) {
-                const tep_goc = document.getElementById('tep_sprite_goc').files[0];
-                if (!tep_goc) return alert("Hãy nạp file .sprite3 cần sửa!");
-                const zip_goc = await JSZip.loadAsync(tep_goc);
-                cau_truc_sprite = JSON.parse(await zip_goc.file("sprite.json").async("text"));
+                container_map.innerHTML = '';
+                const fragment = document.createDocumentFragment();
+                const bat_dau = page_hien_tai * SO_O_MOI_PAGE;
+                const ket_thuc = bat_dau + SO_O_MOI_PAGE;
 
-                for (let ten_tep in zip_goc.files) {
-                    if (ten_tep !== "sprite.json") zip_xuat.file(ten_tep, await zip_goc.files[ten_tep].async("blob"));
+                for (let i = bat_dau; i < ket_thuc; i++) {
+                    const ky_tu = danh_sach_ky_tu_map[i] || ''; 
+                    const o_chu = document.createElement('div');
+                    o_chu.className = 'char-item';
+                    o_chu.innerHTML = ky_tu || '&nbsp;';
+
+                    if (ky_tu) {
+                        o_chu.onclick = () => {
+                            const txt = document.getElementById('danh_sach_ky_tu');
+                            if (txt) {
+                                const currentString = txt.value;
+                                if (currentString.includes(ky_tu)) {
+                                    // Xóa ký tự khỏi chuỗi
+                                    txt.value = currentString.replace(ky_tu, '');
+                                } else {
+                                    // Thêm ký tự vào cuối chuỗi
+                                    txt.value += ky_tu;
+                                }
+                                kich_hoat_preview();
+                                // Cập nhật lại màu sắc của tất cả các ô
+                                update_char_colors();
+                            }
+                        };
+                    } else {
+                        // SỬA CHỖ NÀY: Thêm class char-empty để CSS biết đường né hover ra
+                        o_chu.classList.add('char-empty'); 
+                        
+                        o_chu.style.opacity = '0.15';
+                        o_chu.style.cursor = 'default';
+                    }
+
+                    fragment.appendChild(o_chu);
                 }
-                cau_truc_sprite.costumes = cau_truc_sprite.costumes.concat(du_lieu_costume);
-            } else {
-                cau_truc_sprite.costumes = du_lieu_costume;
+
+                container_map.appendChild(fragment);
+                cap_nhat_page_text();
+                // Cập nhật màu sắc ban đầu
+                update_char_colors();
             }
 
-            zip_xuat.file("sprite.json", JSON.stringify(cau_truc_sprite));
-            const noi_dung = await zip_xuat.generateAsync({type:"blob"});
-            tai_xuong_tep(noi_dung, "BicaFont_V4.1.sprite3");
-            document.getElementById('trang_thai_he_thong').innerText = "Đóng gói hoàn tất bản 4.1!";
-        } catch (error) { alert("Lỗi: " + error.message); }
-    }
+            // 6. PHƠI HÀM ĐỔI PAGE RA GLOBAL CHO HTML GỌI
+            window.doi_page_ky_tu = function(offset) {
+                const tong_page = Math.max(1, Math.ceil(danh_sach_ky_tu_map.length / SO_O_MOI_PAGE));
+                
+                page_hien_tai += offset;
 
-    function mien_cau_truc_goc() {
-        return {
-            "isStage": false, "name": "BicaFontStudio", "variables": {}, "lists": {},
-            "broadcasts": {}, "blocks": {}, "comments": {}, "currentCostume": 0,
-            "costumes": [], "sounds": [], "volume": 100, "visible": true,
-            "x": 0, "y": 0, "size": 100, "direction": 90, "draggable": false, "rotationStyle": "all around"
+                // Giới hạn biên an toàn không cho vượt quá số trang
+                if (page_hien_tai < 0) {
+                    page_hien_tai = 0;
+                }
+                if (page_hien_tai >= tong_page) {
+                    page_hien_tai = tong_page - 1;
+                }
+
+                render_page_ky_tu();
+            };
+
+            // 7. KÍCH HOẠT CHẠY TRANG ĐẦU TIÊN
+            page_hien_tai = 0; // Reset về trang đầu tiên khi đổi font
+            render_page_ky_tu();
+        }
+
+        function tinh_toan_du_lieu_glyph(glyph, font, cau_hinh) {
+            const {
+                size_chu,
+                do_day_vien,
+                do_day_weight,
+                ti_le_width,
+                loai_can_tam,
+                mau_chu,
+                mau_vien
+            } = cau_hinh;
+
+            const ti_le_scale = size_chu / font.unitsPerEm;
+            const phan_dem_vien = do_day_vien + do_day_weight;
+            const co_vien = mau_vien && mau_vien.toLowerCase() !== 'none';
+
+            const ascender_thuc = font.ascender * ti_le_scale;
+            const descender_thuc = font.descender * ti_le_scale;
+            const chieu_cao_an_toan = (ascender_thuc - descender_thuc) + phan_dem_vien;
+
+            const do_rong_goc =
+                glyph.advanceWidth !== undefined ? glyph.advanceWidth : font.unitsPerEm;
+
+            let do_rong_ngang_thuc = do_rong_goc * ti_le_scale * ti_le_width;
+
+            if (do_rong_ngang_thuc <= 0) {
+                do_rong_ngang_thuc = size_chu * 0.25;
+            }
+
+            const do_rong_khung = do_rong_ngang_thuc + phan_dem_vien;
+            const ly_tuong_y = ascender_thuc + (phan_dem_vien / 2);
+
+            // 1. Lấy dữ liệu Path gốc từ opentype.js
+            const path = glyph.getPath(0, 0, size_chu);
+            let svgPathData = path.toPathData(2);
+
+            // Nhân trực tiếp ti_le_width vào tọa độ X bằng Regex
+            // Cách này loại bỏ hoàn toàn việc phải dùng thẻ <g scale(...)> gây méo viền rách chữ
+            if (svgPathData && ti_le_width !== 1) {
+                svgPathData = svgPathData.replace(/([MLCQZSHVAG])([^MLCQZSHVAG]*)/gi, (match, command, args) => {
+                    if (!args.trim()) return match;
+                    // Sửa Regex: Tách đúng số âm bằng cách match số có thể có dấu âm phía trước
+                    let coords = args.trim().match(/-?\d*\.?\d+/g) || [];
+                    if (command.toUpperCase() === 'V') return match;
+                    if (command.toUpperCase() === 'H') {
+                        return command + coords.map(x => Math.round(parseFloat(x) * ti_le_width)).join(' ');
+                    }
+                    for (let k = 0; k < coords.length; k += 2) {
+                        if (coords[k]) coords[k] = Math.round(parseFloat(coords[k]) * ti_le_width);
+                        if (coords[k+1]) coords[k+1] = Math.round(parseFloat(coords[k+1])); // Làm tròn tọa độ Y
+                    }
+                    return command + coords.join(' ');
+                });
+            }
+
+            // 2. Tính độ dày viền (stroke) chuẩn theo pixel thực tế
+            let strokeWidth = co_vien ? (do_day_vien + do_day_weight) : 0;
+            
+            // Giới hạn stroke width không vượt quá 13.6% kích thước chữ để tránh lỗi làm tròn tọa độ
+            const maxStrokeWidth = size_chu * 0.136;
+            if (strokeWidth > maxStrokeWidth) {
+                strokeWidth = maxStrokeWidth;
+            } 
+
+            let logic_net_chu = '';
+            if (svgPathData) {
+                // Sử dụng paint-order="stroke" đẩy viền xuống dưới, fill-rule="evenodd" để khoét lỗ rỗng
+                logic_net_chu = `
+            <g paint-order="stroke">
+                <path d="${svgPathData}"
+                    fill="${mau_chu}"
+                    stroke="${co_vien ? mau_vien : 'none'}"
+                    stroke-width="${strokeWidth}"
+                    stroke-linejoin="round"
+                    stroke-linecap="round"
+                    fill-rule="evenodd" 
+                />
+            </g>`;
+            }
+
+            // Giữ nguyên logic tính toán tọa độ định vị hộp của ông
+            let tam_x = do_rong_khung / 2;
+            let tam_y = chieu_cao_an_toan / 2;
+            let dich_x_g = phan_dem_vien / 2;
+            let dich_y_g = 0;
+
+            const bbox = glyph.getBoundingBox();
+
+            const tam_chu_x =
+                (((bbox.x1 || 0) + (bbox.x2 || 0)) / 2) * ti_le_scale * ti_le_width;
+
+            const tam_chu_y =
+                (((bbox.y1 || 0) + (bbox.y2 || 0)) / 2) * ti_le_scale;
+
+            if (loai_can_tam === 'baseline') {
+                dich_y_g = ly_tuong_y;
+                tam_y = ly_tuong_y;
+
+            } else if (loai_can_tam === 'center_glyph') {
+                dich_y_g = ly_tuong_y;
+                tam_x = dich_x_g + tam_chu_x;
+                tam_y = ly_tuong_y - tam_chu_y;
+
+            } else if (loai_can_tam === 'center_box') {
+                dich_x_g = tam_x - tam_chu_x;
+                dich_y_g = tam_y + tam_chu_y;
+            }
+
+            return {
+                do_rong_khung,
+                chieu_cao_an_toan,
+                tam_x,
+                tam_y,
+                dich_x_g,
+                dich_y_g,
+                logic_net_chu,
+                valid: !!svgPathData
+            };
+        }
+
+        function lay_cau_hinh_hien_tai() {
+            // Nếu checkbox tắt -> Ép biến màu viền thành 'none' để logic tự ngắt viền
+            const checkbox = document.getElementById('co_vien_checkbox');
+            const mau_vien_thuc_te = (checkbox && checkbox.checked) 
+                ? document.getElementById('mau_vien').value.trim() 
+                : 'none';
+
+            return {
+                size_chu: Math.min(Math.max(parseInt(document.getElementById('kich_thuoc_chu').value) || 64, 4), 512),
+                mau_chu: document.getElementById('mau_chu').value.trim(),
+                mau_vien: mau_vien_thuc_te, // Đã cập nhật
+                do_day_vien: Math.min(Math.max(parseFloat(document.getElementById('do_day_vien').value) || 0, 0), 100),
+                do_day_weight: Math.min(Math.max(parseFloat(document.getElementById('do_day_weight').value) || 0, 0), 10),
+                ti_le_width: Math.min(Math.max(parseFloat(document.getElementById('ti_le_width').value) || 1.0, 0.3), 3.0),
+                loai_can_tam: (() => {
+                    const checkedRadio = document.querySelector('input[name="loai_can_tam"]:checked');
+                    return checkedRadio ? checkedRadio.value : 'baseline';
+                })()
+            };
+        }
+
+        function kich_hoat_preview() {
+            // Cập nhật max value và label cho input độ dày viền theo kích thước chữ
+            const sizeChu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
+            const maxStrokeWidth = Math.floor(sizeChu * 0.136);
+            document.getElementById('do_day_vien').max = maxStrokeWidth;
+            document.getElementById('max_stroke_display').textContent = maxStrokeWidth;
+
+            // Nếu giá trị hiện tại vượt quá max mới, tự động giảm xuống max mới
+            const currentStroke = parseFloat(document.getElementById('do_day_vien').value) || 0;
+            if (currentStroke > maxStrokeWidth) {
+                document.getElementById('do_day_vien').value = maxStrokeWidth;
+            }
+
+            const vung_view = document.getElementById('vung_hien_thi_preview');
+            const chuoi_test = document.getElementById('chuoi_preview').value || "Preview";
+            const ten_font = lay_ten_font_da_chon();
+            const font = kho_font_da_tai[ten_font] || window.font_hien_tai;
+
+            if (!font) {
+                const t = uiTexts[currentLanguage];
+                vung_view.textContent = t.status_no_font;
+                vung_view.style.fontSize = "16px";
+                vung_view.style.color = "#aaa";
+                return;
+            }
+
+            vung_view.innerHTML = '';
+            ['fontSize', 'webkitTextStroke', 'textShadow', 'transform'].forEach(p => vung_view.style[p] = 'unset');
+
+            const wrapper = document.createElement('div');
+            Object.assign(wrapper.style, { display: 'flex', justifyContent: 'center', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2px' });
+
+            const cau_hinh = lay_cau_hinh_hien_tai();
+            
+            // TỐI ƯU: Chỉ render tối đa 100 ký tự để không sập máy
+            const chuoi_render = chuoi_test.slice(0, 100);
+
+            for (let i = 0; i < chuoi_render.length; i++) {
+                const glyph = font.charToGlyph(chuoi_render[i]);
+                const data = tinh_toan_du_lieu_glyph(glyph, font, cau_hinh);
+
+                const item_box = document.createElement('div');
+                Object.assign(item_box.style, { position: 'relative', width: `${data.do_rong_khung}px`, height: `${data.chieu_cao_an_toan}px`, border: '1px dashed rgba(255, 255, 255, 0.08)' });
+
+                const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svgEl.setAttribute("width", data.do_rong_khung);
+                svgEl.setAttribute("height", data.chieu_cao_an_toan);
+                svgEl.style.display = 'block';
+                
+                if (data.logic_net_chu) {
+                    svgEl.innerHTML = `<g transform="translate(${data.dich_x_g}, ${data.dich_y_g})">${data.logic_net_chu}</g>`;
+                }
+                item_box.appendChild(svgEl);
+
+                [[`top: ${data.tam_y}px; left: 0; width: 100%; height: 1px;`, 'rgba(255, 71, 87, 0.3)'],
+                 [`left: ${data.tam_x}px; top: 0; width: 1px; height: 100%;`, 'rgba(255, 71, 87, 0.3)']].forEach(style => {
+                    const line = document.createElement('div');
+                    line.style = `position: absolute; pointer-events: none; ${style[0]} background-color: ${style[1]};`;
+                    item_box.appendChild(line);
+                });
+
+                const tam_dot = document.createElement('div');
+                tam_dot.style = `position: absolute; left: ${data.tam_x}px; top: ${data.tam_y}px; width: 6px; height: 6px; background-color: #ff4757; border-radius: 50%; transform: translate(-50%, -50%); z-index: 5; pointer-events: none;`;
+                item_box.appendChild(tam_dot);
+
+                wrapper.appendChild(item_box);
+            }
+            
+            // TỐI ƯU: Báo hiệu nếu chuỗi bị cắt
+            if (chuoi_test.length > 100) {
+                const warning = document.createElement('div');
+                warning.style = "width: 100%; color: #eccc68; margin-top: 10px; font-size: 14px;";
+                warning.innerText = `(Đã ẩn bớt ${chuoi_test.length - 100} ký tự hiển thị để chống lag máy...)`;
+                wrapper.appendChild(warning);
+            }
+
+            // TỐI ƯU: Đẩy vào DOM 1 lần duy nhất ở cuối
+            vung_view.appendChild(wrapper);
+        }
+
+        function xuat_danh_sach_do_rong() {
+            try {
+                const ten_kieu_da_chon = lay_ten_font_da_chon();
+                const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
+                if (!font_hoat_dong) return alert("Vui lòng nạp Font chữ trước!");
+
+                const size_chu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
+                const ti_le_scale = size_chu / font_hoat_dong.unitsPerEm;
+                const ti_le_width = parseFloat(document.getElementById('ti_le_width').value) || 1.0;
+                const do_day_weight = parseFloat(document.getElementById('do_day_weight').value) || 0;
+                const do_day_vien = parseFloat(document.getElementById('do_day_vien').value) || 0;
+                const phan_dem_vien = do_day_vien + do_day_weight;
+
+                const danh_sach_chu = document.getElementById('danh_sach_ky_tu').value;
+                
+                // TỐI ƯU: Sử dụng mảng để gom dữ liệu
+                let mang_ket_qua = [danh_sach_chu];
+
+                for (let i = 0; i < danh_sach_chu.length; i++) {
+                    const ky_tu = danh_sach_chu[i];
+                    if (ky_tu === '\r' || ky_tu === '\n') continue;
+
+                    const glyph = font_hoat_dong.charToGlyph(ky_tu);
+                    const do_rong_goc = glyph.advanceWidth !== undefined ? glyph.advanceWidth : font_hoat_dong.unitsPerEm;
+                    const do_rong_ngang = (do_rong_goc * ti_le_scale * ti_le_width) + phan_dem_vien;
+                    mang_ket_qua.push(do_rong_ngang);
+                }
+
+                document.getElementById('ket_qua_do_rong').value = mang_ket_qua.join('\n');
+                document.getElementById('vung_ket_qua_text').style.display = 'block';
+                document.getElementById('trang_thai_he_thong').innerText = "Đã kết xuất ma trận độ rộng tương ứng!";
+            } catch (error) {
+                alert("Lỗi: " + error.message);
+            }
+        }
+
+        const bo_loc_ten_sheep = {
+            "/": "slash", "\\": "backslash", ":": "colon", "*": "asterisk", "?": "question",
+            '"': "quote", "<": "less_than", ">": "greater_than", "|": "pipe", " ": "space",
+            "\n": "newline", "\r": "carriage_return", "\t": "tab", ".": "dot"
         };
-    }
 
-    function tao_sprite3_trong() {
-        try {
-            let zip_trong = new JSZip();
-            zip_trong.file("sprite.json", JSON.stringify(mien_cau_truc_goc()));
-            zip_trong.generateAsync({type:"blob"}).then(function(blob) {
-                tai_xuong_tep(blob, "BicaFont_Empty.sprite3");
-                document.getElementById('trang_thai_he_thong').innerText = "Đã xuất file .Sprite3 rỗng!";
-            });
-        } catch(e) { alert("Lỗi: " + e.message); }
-    }
+        async function bat_dau_xu_ly_sprite() {
+            try {
+                const ten_kieu_da_chon = lay_ten_font_da_chon();
+                const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
+                if (!font_hoat_dong) return alert("Vui lòng nạp Font chữ!");
 
-    function tai_xuong_tep(blob, filename) {
-        const the_a = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        the_a.href = url; the_a.download = filename; the_a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
-</script>
+                const danh_sach_chu = document.getElementById('danh_sach_ky_tu').value;
+                const che_do_sua = document.querySelector('input[name="che_do"]:checked').value === 'modify';
+                const cau_hinh = lay_cau_hinh_hien_tai();
+                const statusEl = document.getElementById('trang_thai_he_thong');
+
+                let zip_xuat = new JSZip();
+                let du_lieu_costume = [];
+                const mang_ky_tu_duy_nhat = [...new Set(danh_sach_chu.split(''))];
+                const tong_so_chu = mang_ky_tu_duy_nhat.length;
+
+                for (let i = 0; i < tong_so_chu; i++) {
+                    let ky_tu = mang_ky_tu_duy_nhat[i];
+                    if (ky_tu === '\r' || ky_tu === '\n') continue;
+
+                    // TỐI ƯU: Nhả thread cho trình duyệt thở sau mỗi 200 ký tự & Cập nhật UI
+                    if (i > 0 && i % 200 === 0) {
+                        statusEl.innerText = `Đang xử lý SVG: ${i} / ${tong_so_chu} ký tự...`;
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                    }
+
+                    const glyph = font_hoat_dong.charToGlyph(ky_tu);
+                    const data = tinh_toan_du_lieu_glyph(glyph, font_hoat_dong, cau_hinh);
+
+                    let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${data.do_rong_khung}" height="${data.chieu_cao_an_toan}" viewBox="0 0 ${data.do_rong_khung} ${data.chieu_cao_an_toan}">`;
+                    if (data.logic_net_chu) {
+                        svgContent += `<g transform="translate(${data.dich_x_g}, ${data.dich_y_g})">${data.logic_net_chu}</g>`;
+                    }
+                    svgContent += `</svg>`;
+
+                    // Luồng Vật Lý: dùng số thứ tự làm tên file trong ZIP
+                    const ten_file_zip = `${i}.svg`;
+                    zip_xuat.file(ten_file_zip, svgContent);
+
+                    // Luồng Giao Diện: name dùng ky_tu, md5ext dùng số thứ tự
+                    du_lieu_costume.push({
+                        "name": ky_tu,
+                        "bitmapResolution": 1,
+                        "dataFormat": "svg",
+                        "assetId": ten_file_zip,
+                        "md5ext": ten_file_zip,
+                        "rotationCenterX": data.tam_x,
+                        "rotationCenterY": data.tam_y
+                    });
+                }
+
+                statusEl.innerText = "Đang nén file tải xuống...";
+                await new Promise(resolve => setTimeout(resolve, 10)); // Cho UI cập nhật dòng text trên
+
+                if (du_lieu_costume.length === 0 && !che_do_sua) {
+                    const svg_trong = `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>`;
+                    const md5_hash = SparkMD5.hash(svg_trong);
+                    zip_xuat.file(`${md5_hash}.svg`, svg_trong);
+                    du_lieu_costume.push({ "name": "empty", "bitmapResolution": 1, "dataFormat": "svg", "assetId": md5_hash, "md5ext": `${md5_hash}.svg`, "rotationCenterX": 0, "rotationCenterY": 0 });
+                }
+
+                let cau_truc_sprite = mien_cau_truc_goc();
+                if (che_do_sua) {
+                    const tep_goc = document.getElementById('tep_sprite_goc').files[0];
+                    if (!tep_goc) return alert("Hãy nạp file .sprite3 cần sửa!");
+                    const zip_goc = await JSZip.loadAsync(tep_goc);
+                    cau_truc_sprite = JSON.parse(await zip_goc.file("sprite.json").async("text"));
+                    for (let ten_tep in zip_goc.files) {
+                        if (ten_tep !== "sprite.json") zip_xuat.file(ten_tep, await zip_goc.files[ten_tep].async("blob"));
+                    }
+                    cau_truc_sprite.costumes = cau_truc_sprite.costumes.concat(du_lieu_costume);
+                } else {
+                    cau_truc_sprite.costumes = du_lieu_costume;
+                }
+
+                zip_xuat.file("sprite.json", JSON.stringify(cau_truc_sprite));
+                tai_xuong_tep(await zip_xuat.generateAsync({ type: "blob" }), "font.sprite3");
+                statusEl.innerText = "Đã đóng gói xong font.sprite3!";
+            } catch (error) {
+                alert("Lỗi: " + error.message);
+            }
+        }
+
+        async function bat_dau_xu_ly_zip_svg() {
+            try {
+                const ten_kieu_da_chon = lay_ten_font_da_chon();
+                const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
+                if (!font_hoat_dong) return alert("Vui lòng nạp Font chữ!");
+
+                const danh_sach_chu = document.getElementById('danh_sach_ky_tu').value;
+                const cau_hinh = lay_cau_hinh_hien_tai();
+                let zip_xuat = new JSZip();
+
+                const mang_ky_tu_duy_nhat = [...new Set(danh_sach_chu.split(''))];
+
+                for (let i = 0; i < mang_ky_tu_duy_nhat.length; i++) {
+                    let ky_tu = mang_ky_tu_duy_nhat[i];
+                    if (ky_tu === '\r' || ky_tu === '\n') continue;
+
+                    const glyph = font_hoat_dong.charToGlyph(ky_tu);
+                    const data = tinh_toan_du_lieu_glyph(glyph, font_hoat_dong, cau_hinh);
+                    if (!data.valid) continue;
+
+                    const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${data.do_rong_khung}" height="${data.chieu_cao_an_toan}" viewBox="0 0 ${data.do_rong_khung} ${data.chieu_cao_an_toan}"><g transform="translate(${data.dich_x_g}, ${data.dich_y_g}) scale(${cau_hinh.ti_le_width}, 1)">${data.logic_net_chu}</g></svg>`;
+
+                    let folderName = "others";
+                    if (ky_tu !== ky_tu.toUpperCase() && ky_tu === ky_tu.toLowerCase()) folderName = "lowercase";
+                    else if (ky_tu !== ky_tu.toLowerCase() && ky_tu === ky_tu.toUpperCase()) folderName = "uppercase";
+
+                    // Dùng số thứ tự làm tên file trong ZIP
+                    const ten_file_zip = `${i}.svg`;
+                    zip_xuat.file(`${folderName}/${ten_file_zip}`, svgContent);
+                }
+
+                tai_xuong_tep(await zip_xuat.generateAsync({ type: "blob" }), "font.zip");
+                document.getElementById('trang_thai_he_thong').innerText = "Đã đóng gói font.zip chứa SVG!";
+            } catch (error) {
+                alert("Lỗi: " + error.message);
+            }
+        }
+
+        function mien_cau_truc_goc() {
+            return {
+                "isStage": false,
+                "name": "BicaFontStudio",
+                "variables": {},
+                "lists": {},
+                "broadcasts": {},
+                "blocks": {},
+                "comments": {},
+                "currentCostume": 0,
+                "costumes": [],
+                "sounds": [],
+                "volume": 100,
+                "visible": true,
+                "x": 0,
+                "y": 0,
+                "size": 100,
+                "direction": 90,
+                "draggable": false,
+                "rotationStyle": "all around"
+            };
+        }
+
+        function tai_xuong_tep(blob, filename) {
+            const the_a = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            the_a.href = url;
+            the_a.download = filename;
+            the_a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+    </script>
 </body>
+
 </html>
