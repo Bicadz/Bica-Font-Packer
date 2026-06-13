@@ -342,6 +342,12 @@
                 status_export_width: "Đã kết xuất ma trận độ rộng tương ứng!",
                 status_export_sprite: "Đã đóng gói file .Sprite3!",
                 status_export_zip: "Đã đóng gói font.zip chứa SVG!",
+                status_error_font_parse: "Lỗi phân tích Font: ",
+                status_error_file_read: "Lỗi đọc file: ",
+                alert_file_read_error: "Không thể đọc file. Vui lòng thử lại.",
+                status_error_sprite_invalid: "File .sprite3 không hợp lệ: thiếu sprite.json!",
+                alert_sprite_invalid: "File .sprite3 không hợp lệ (thiếu sprite.json).",
+                status_zip_font_errors: " font không thể đọc đã bị bỏ qua.",
                 status_updating_string: "Đang cập nhật chuỗi kí tự cuối cùng sẽ xuất bản",
                 preview_default: "Bica Font Packer",
                 preset: {
@@ -419,6 +425,12 @@
                 status_export_width: "Width matrix exported successfully!",
                 status_export_sprite: ".Sprite3 file packaged!",
                 status_export_zip: "font.zip with SVG packaged!",
+                status_error_font_parse: "Error parsing font: ",
+                status_error_file_read: "Error reading file: ",
+                alert_file_read_error: "Cannot read the file. Please try again.",
+                status_error_sprite_invalid: "Invalid .sprite3 file: sprite.json not found!",
+                alert_sprite_invalid: "The loaded .sprite3 file is invalid (missing sprite.json).",
+                status_zip_font_errors: " unreadable font(s) skipped.",
                 status_updating_string: "Updating final character string to publish",
                 preview_default: "Bica Font Packer",
                 preset: {
@@ -676,6 +688,7 @@
         }
 
         function cap_nhat_tong_dung_luong_svg() {
+            try {
             const ten_kieu_da_chon = lay_ten_font_da_chon();
             const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
             if (!font_hoat_dong) return;
@@ -700,6 +713,9 @@
             const tongDungLuongEl = document.getElementById('tong_dung_luong_svg');
             if (tongDungLuongEl) {
                 tongDungLuongEl.textContent = `${tongDungLuongKB} KB`;
+            }
+            } catch (e) {
+                console.error("Error in cap_nhat_tong_dung_luong_svg:", e);
             }
         }
 
@@ -743,9 +759,12 @@
         }
 
         function dong_bo_mau(nguon_id, dich_id) {
-            const gia_tri = document.getElementById(nguon_id).value;
+            const nguon_el = document.getElementById(nguon_id);
+            const dich_el = document.getElementById(dich_id);
+            if (!nguon_el || !dich_el) return;
+            const gia_tri = nguon_el.value;
             if (nguon_id.includes('picker') || /^#([0-9A-F]{3}){1,2}$/i.test(gia_tri) || gia_tri.toLowerCase() === 'none') {
-                document.getElementById(dich_id).value = gia_tri;
+                dich_el.value = gia_tri;
                 kich_hoat_preview();
             }
         }
@@ -769,6 +788,7 @@
         }
 
         function dat_mac_dinh() {
+            try {
             // Đặt lại màu chữ
             document.getElementById('mau_chu').value = '#ffffff';
             document.getElementById('picker_mau_chu').value = '#ffffff';            
@@ -787,6 +807,9 @@
             // Đặt lại căn tâm tọa độ về baseline
             document.getElementById('align_baseline').checked = true;
             kich_hoat_preview();
+            } catch (e) {
+                console.error("Error in dat_mac_dinh:", e);
+            }
         }
 
         document.getElementsByName('che_do').forEach(radio => {
@@ -849,10 +872,10 @@
                 }
 
                 kho_font_da_tai[ten_font] = font_parse;
-                return true;
+                return {ok: true};
             } catch (e) {
                 console.error("Lỗi phân tích cú pháp Font:", e);
-                return false;
+                return {ok: false, error: e.message || String(e)};
             }
         }
 
@@ -892,6 +915,7 @@
                     }
 
                     let dem_file_loai_bo = 0;
+                    let dem_font_loi = 0;
 
                     for (let filename in zip.files) {
                         const filename_low = filename.toLowerCase();
@@ -909,8 +933,11 @@
                             }
 
                             const buffer = await zip.files[filename].async("arraybuffer");
-                            if (nap_font_tu_buffer(buffer)) {
+                            const ket_qua_parse = nap_font_tu_buffer(buffer);
+                            if (ket_qua_parse.ok) {
                                 co_font_hop_le = true;
+                            } else {
+                                dem_font_loi++;
                             }
                         }
                     }
@@ -923,6 +950,9 @@
                             thong_bao += t.status_google_fonts_detected;
                         } else if (dem_file_loai_bo > 0) {
                             thong_bao += `${t.status_variable_filtered} ${dem_file_loai_bo}${t.status_variable_filtered_end}`;
+                        }
+                        if (dem_font_loi > 0) {
+                            thong_bao += " (" + dem_font_loi + t.status_zip_font_errors + ")";
                         }
                         hien_thai_thai(thong_bao);
                         
@@ -949,10 +979,11 @@
             } else {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const thanh_cong = nap_font_tu_buffer(e.target.result);
-                    if (!thanh_cong) {
-                        hien_thai_thai("Lỗi: Định dạng font không hỗ trợ!");
-                        alert("Không thể đọc được file Font này!");
+                    const ket_qua = nap_font_tu_buffer(e.target.result);
+                    if (!ket_qua.ok) {
+                        const t = uiTexts[currentLanguage];
+                        hien_thai_thai(t.status_error_font_parse + ket_qua.error);
+                        alert(ket_qua.error);
                         return;
                     }
                     
@@ -980,6 +1011,11 @@
                             doi_preset_ngon_ngu();
                         }
                     }
+                };
+                reader.onerror = function() {
+                    const t = uiTexts[currentLanguage];
+                    hien_thai_thai(t.status_error_file_read + file.name);
+                    alert(t.alert_file_read_error);
                 };
                 reader.readAsArrayBuffer(file);
             }
@@ -1297,6 +1333,8 @@
         }
 
         function kich_hoat_preview() {
+            const t = uiTexts[currentLanguage];
+            try {
             // Cập nhật max value và label cho input độ dày viền theo kích thước chữ
             const sizeChu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
             const maxStrokeWidth = Math.floor(sizeChu * 0.1367);
@@ -1374,6 +1412,9 @@
 
             // TỐI ƯU: Đẩy vào DOM 1 lần duy nhất ở cuối
             vung_view.appendChild(wrapper);
+            } catch (e) {
+                console.error("Error in kich_hoat_preview:", e);
+            }
         }
 
         function xuat_danh_sach_do_rong() {
@@ -1411,7 +1452,8 @@
                 document.getElementById('vung_ket_qua_text').style.display = 'block';
                 hien_thai_thai(uiTexts[currentLanguage].status_export_width);
             } catch (error) {
-                alert("Lỗi: " + error.message);
+                hien_thai_thai("Lỗi: " + error.message);
+                alert(error.message);
             }
         }
 
@@ -1504,7 +1546,14 @@
                         return;
                     }
                     const zip_goc = await JSZip.loadAsync(tep_goc);
-                    cau_truc_sprite = JSON.parse(await zip_goc.file("sprite.json").async("text"));
+                    const sprite_json_file = zip_goc.file("sprite.json");
+                    if (!sprite_json_file) {
+                        const t = uiTexts[currentLanguage];
+                        hien_thai_thai(t.status_error_sprite_invalid);
+                        alert(t.alert_sprite_invalid);
+                        return;
+                    }
+                    cau_truc_sprite = JSON.parse(await sprite_json_file.async("text"));
                     for (let ten_tep in zip_goc.files) {
                         if (ten_tep !== "sprite.json") zip_xuat.file(ten_tep, await zip_goc.files[ten_tep].async("blob"));
                     }
@@ -1526,6 +1575,7 @@
                 hien_thai_thai(uiTexts[currentLanguage].status_export_sprite);
             } catch (error) {
                 hien_thai_thai("Lỗi: " + error.message);
+                alert(error.message);
             }
         }
 
@@ -1568,6 +1618,7 @@
                 hien_thai_thai(uiTexts[currentLanguage].status_export_zip);
             } catch (error) {
                 hien_thai_thai("Lỗi: " + error.message);
+                alert(error.message);
             }
         }
 
