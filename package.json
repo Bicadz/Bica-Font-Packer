@@ -1,0 +1,15 @@
+{
+  "name": "bica-font-packer",
+  "version": "1.0.0",
+  "description": "A web-based font packer for Scratch .sprite3 files",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.1",
+    "@vitest/coverage-v8": "^3.2.1"
+  }
+}
