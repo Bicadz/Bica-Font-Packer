@@ -24,7 +24,7 @@
         input[type="color"]{width:45px;height:38px;border:1px solid #444;background:none;border-radius:6px;cursor:pointer;padding:0;}
         .radio-group{background:#1a1a22;padding:12px;border-radius:6px;margin-top:8px;}
         .radio-item{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-        .adio-item:last-child{margin-bottom:0;}
+        .radio-item:last-child{margin-bottom:0;}
         .radio-item input {width:18px;height:18px;cursor:pointer;}
         button{background:#ff4757;color:white;border:none;padding:12px 20px;font-weight:bold;border-radius:6px;cursor:pointer;width:100%;margin-top:12px;font-size:15px;transition:0.2s;}
         button:hover{background:#ff6b81;}
@@ -352,6 +352,12 @@
                 status_export_width: "Đã kết xuất ma trận độ rộng tương ứng!",
                 status_export_sprite: "Đã đóng gói file .Sprite3!",
                 status_export_zip: "Đã đóng gói font.zip chứa SVG!",
+                status_error_font_parse: "Lỗi phân tích Font: ",
+                status_error_file_read: "Lỗi đọc file: ",
+                alert_file_read_error: "Không thể đọc file. Vui lòng thử lại.",
+                status_error_sprite_invalid: "File .sprite3 không hợp lệ: thiếu sprite.json!",
+                alert_sprite_invalid: "File .sprite3 không hợp lệ (thiếu sprite.json).",
+                status_zip_font_errors: " font không thể đọc đã bị bỏ qua.",
                 status_updating_string: "Đang cập nhật chuỗi kí tự cuối cùng sẽ xuất bản",
                 preview_default: "Bica Font Packer",
                 preset: {
@@ -429,6 +435,12 @@
                 status_export_width: "Width matrix exported successfully!",
                 status_export_sprite: ".Sprite3 file packaged!",
                 status_export_zip: "font.zip with SVG packaged!",
+                status_error_font_parse: "Error parsing font: ",
+                status_error_file_read: "Error reading file: ",
+                alert_file_read_error: "Cannot read the file. Please try again.",
+                status_error_sprite_invalid: "Invalid .sprite3 file: sprite.json not found!",
+                alert_sprite_invalid: "The loaded .sprite3 file is invalid (missing sprite.json).",
+                status_zip_font_errors: " unreadable font(s) skipped.",
                 status_updating_string: "Updating final character string to publish",
                 preview_default: "Bica Font Packer",
                 preset: {
@@ -634,7 +646,7 @@
             if (txt) {
                 chuoi_ky_tu_hien_tai = txt.value;
                 kich_hoat_preview();
-                cap_nhat_mau_chu();
+                if (typeof window._cap_nhat_mau_chu === 'function') window._cap_nhat_mau_chu();
                 
                 // Cập nhật tổng số ký tự (dùng độ dài textarea)
                 const tongSoKyTu = document.getElementById('tong_so_ky_tu');
@@ -686,6 +698,7 @@
         }
 
         function cap_nhat_tong_dung_luong_svg() {
+            try {
             const ten_kieu_da_chon = lay_ten_font_da_chon();
             const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
             if (!font_hoat_dong) return;
@@ -710,6 +723,9 @@
             const tongDungLuongEl = document.getElementById('tong_dung_luong_svg');
             if (tongDungLuongEl) {
                 tongDungLuongEl.textContent = `${tongDungLuongKB} KB`;
+            }
+            } catch (e) {
+                console.error("Error in cap_nhat_tong_dung_luong_svg:", e);
             }
         }
 
@@ -753,9 +769,12 @@
         }
 
         function dong_bo_mau(nguon_id, dich_id) {
-            const gia_tri = document.getElementById(nguon_id).value;
+            const nguon_el = document.getElementById(nguon_id);
+            const dich_el = document.getElementById(dich_id);
+            if (!nguon_el || !dich_el) return;
+            const gia_tri = nguon_el.value;
             if (nguon_id.includes('picker') || /^#([0-9A-F]{3}){1,2}$/i.test(gia_tri) || gia_tri.toLowerCase() === 'none') {
-                document.getElementById(dich_id).value = gia_tri;
+                dich_el.value = gia_tri;
                 kich_hoat_preview();
             }
         }
@@ -779,6 +798,7 @@
         }
 
         function dat_mac_dinh() {
+            try {
             // Đặt lại màu chữ
             document.getElementById('mau_chu').value = '#ffffff';
             document.getElementById('picker_mau_chu').value = '#ffffff';            
@@ -797,6 +817,9 @@
             // Đặt lại căn tâm tọa độ về baseline
             document.getElementById('align_baseline').checked = true;
             kich_hoat_preview();
+            } catch (e) {
+                console.error("Error in dat_mac_dinh:", e);
+            }
         }
 
         document.getElementsByName('che_do').forEach(radio => {
@@ -859,10 +882,10 @@
                 }
 
                 kho_font_da_tai[ten_font] = font_parse;
-                return true;
+                return {ok: true};
             } catch (e) {
                 console.error("Lỗi phân tích cú pháp Font:", e);
-                return false;
+                return {ok: false, error: e.message || String(e)};
             }
         }
 
@@ -870,8 +893,15 @@
             const file = e.target.files[0];
             if (!file) return;
 
+            // Revoke old blob URLs before clearing font store to prevent memory leaks
+            for (let ten in kho_font_da_tai) {
+                const oldFont = kho_font_da_tai[ten];
+                if (oldFont._blobUrl) URL.revokeObjectURL(oldFont._blobUrl);
+                const oldStyle = document.getElementById('style_' + (oldFont._safeName || ''));
+                if (oldStyle) oldStyle.remove();
+            }
             kho_font_da_tai = {};
-            hien_thai_thai("Đang xử lý cấu trúc nhị phân Font...");
+            hien_thai_thai(uiTexts[currentLanguage].status_load_font);
 
             const ten_file_low = file.name.toLowerCase();
 
@@ -895,6 +925,7 @@
                     }
 
                     let dem_file_loai_bo = 0;
+                    let dem_font_loi = 0;
 
                     for (let filename in zip.files) {
                         const filename_low = filename.toLowerCase();
@@ -912,8 +943,11 @@
                             }
 
                             const buffer = await zip.files[filename].async("arraybuffer");
-                            if (nap_font_tu_buffer(buffer)) {
+                            const ket_qua_parse = nap_font_tu_buffer(buffer);
+                            if (ket_qua_parse.ok) {
                                 co_font_hop_le = true;
+                            } else {
+                                dem_font_loi++;
                             }
                         }
                     }
@@ -926,6 +960,9 @@
                             thong_bao += t.status_google_fonts_detected;
                         } else if (dem_file_loai_bo > 0) {
                             thong_bao += `${t.status_variable_filtered} ${dem_file_loai_bo}${t.status_variable_filtered_end}`;
+                        }
+                        if (dem_font_loi > 0) {
+                            thong_bao += " (" + dem_font_loi + t.status_zip_font_errors + ")";
                         }
                         hien_thai_thai(thong_bao);
                         
@@ -952,10 +989,11 @@
             } else {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const thanh_cong = nap_font_tu_buffer(e.target.result);
-                    if (!thanh_cong) {
-                        hien_thai_thai("Lỗi: Định dạng font không hỗ trợ!");
-                        alert("Không thể đọc được file Font này!");
+                    const ket_qua = nap_font_tu_buffer(e.target.result);
+                    if (!ket_qua.ok) {
+                        const t = uiTexts[currentLanguage];
+                        hien_thai_thai(t.status_error_font_parse + ket_qua.error);
+                        alert(ket_qua.error);
                         return;
                     }
                     
@@ -972,7 +1010,7 @@
                     style_preview.textContent = `@font-face { font-family: 'DynamicBicaFont'; src: url('${url_font_preview}'); }`;
 
                     cap_nhat_va_dung_giao_dien(true);
-                    hien_thai_thai("Nạp font thành công!");
+                    hien_thai_thai(uiTexts[currentLanguage].status_load_success);
                     
                     // Kiểm tra nếu là font Chinese (SC/TC) thì tự chọn preset Chinese
                     const ten_font_goc = file.name.toLowerCase();
@@ -983,6 +1021,11 @@
                             doi_preset_ngon_ngu();
                         }
                     }
+                };
+                reader.onerror = function() {
+                    const t = uiTexts[currentLanguage];
+                    hien_thai_thai(t.status_error_file_read + file.name);
+                    alert(t.alert_file_read_error);
                 };
                 reader.readAsArrayBuffer(file);
             }
@@ -1013,24 +1056,12 @@
                 for (let ten in kho_font_da_tai) {
                     const font = kho_font_da_tai[ten];
                     const safeName = font._safeName || "sans-serif";
-
-                    const label = document.createElement('label');
-                    label.style.cssText = 'display:flex; align-items:center; padding:8px; cursor:pointer; border-bottom:1px solid #333;';
-
-                    const radio = document.createElement('input');
-                    radio.type = 'radio';
-                    radio.name = 'font_choice';
-                    radio.value = ten;
-                    radio.style.cssText = 'margin-right:10px; transform:scale(1.2);';
-                    radio.addEventListener('change', () => cap_nhat_va_dung_giao_dien(false));
-
-                    const span = document.createElement('span');
-                    span.style.cssText = `font-family:'${safeName}', sans-serif; font-size:16px; color:#fff;`;
-                    span.textContent = 'Hamburgevons - ' + ten;
-
-                    label.appendChild(radio);
-                    label.appendChild(span);
-                    listDiv.appendChild(label);
+                    const escapedTen = ten.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                    html += `
+                    <label style="display:flex; align-items:center; padding:8px; cursor:pointer; border-bottom:1px solid #333;">
+                        <input type="radio" name="font_choice" value="${escapedTen}" onchange="cap_nhat_va_dung_giao_dien(false)" style="margin-right:10px; transform:scale(1.2);">
+                        <span style="font-family:'${safeName}', sans-serif; font-size:16px; color:#fff;">Hamburgevons - ${escapedTen}</span>
+                    </label>`;
                 }
 
                 container.appendChild(listDiv);
@@ -1120,7 +1151,7 @@
                 }
             }
 
-            // 4. HÀM CON: CẬP NHẬT MÀU SẮC CÁC Ô KÝ TỰ
+            // 4. HÀM CON: CẬP NHẬT MÀU SẮC CÁC Ô KÝ TỰ (exposed globally as window._cap_nhat_mau_chu)
             function cap_nhat_mau_chu() {
                 const charItems = document.querySelectorAll('.char-item');
                 
@@ -1135,6 +1166,7 @@
                     }
                 });
             }
+            window._cap_nhat_mau_chu = cap_nhat_mau_chu;
 
             // 5. HÀM CON: VẼ HÌNH ẢNH CÁC Ô KÝ TỰ
             function render_page_ky_tu() {
@@ -1323,6 +1355,8 @@
         }
 
         function kich_hoat_preview() {
+            const t = uiTexts[currentLanguage];
+            try {
             // Cập nhật max value và label cho input độ dày viền theo kích thước chữ
             const sizeChu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
             const maxStrokeWidth = Math.floor(sizeChu * 0.1367);
@@ -1336,12 +1370,12 @@
             }
 
             const vung_view = document.getElementById('vung_hien_thi_preview');
+            const t = uiTexts[currentLanguage];
             const chuoi_test = document.getElementById('chuoi_preview').value || t.preview_default;
             const ten_font = lay_ten_font_da_chon();
             const font = kho_font_da_tai[ten_font] || window.font_hien_tai;
 
             if (!font) {
-                const t = uiTexts[currentLanguage];
                 vung_view.textContent = t.status_no_font;
                 vung_view.style.fontSize = "16px";
                 vung_view.style.color = "#aaa";
@@ -1400,6 +1434,9 @@
 
             // TỐI ƯU: Đẩy vào DOM 1 lần duy nhất ở cuối
             vung_view.appendChild(wrapper);
+            } catch (e) {
+                console.error("Error in kich_hoat_preview:", e);
+            }
         }
 
         function xuat_danh_sach_do_rong() {
@@ -1414,7 +1451,7 @@
 
                 const size_chu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
                 const ti_le_scale = size_chu / font_hoat_dong.unitsPerEm;
-                const ti_le_width = parseFloat(document.getElementById('ti_le_width').value) || 1.0;
+                const ti_le_width = (Math.min(Math.max(parseFloat(document.getElementById('ti_le_width').value) || 100, 30), 300)) / 100;
                 const do_day_vien = parseFloat(document.getElementById('do_day_vien').value) || 0;
                 const phan_dem_vien = do_day_vien;
 
@@ -1435,9 +1472,10 @@
 
                 document.getElementById('ket_qua_do_rong').value = mang_ket_qua.join('\n');
                 document.getElementById('vung_ket_qua_text').style.display = 'block';
-                hien_thai_thai("Đã kết xuất ma trận độ rộng tương ứng!");
+                hien_thai_thai(uiTexts[currentLanguage].status_export_width);
             } catch (error) {
-                alert("Lỗi: " + error.message);
+                hien_thai_thai("Lỗi: " + error.message);
+                alert(error.message);
             }
         }
 
@@ -1530,7 +1568,14 @@
                         return;
                     }
                     const zip_goc = await JSZip.loadAsync(tep_goc);
-                    cau_truc_sprite = JSON.parse(await zip_goc.file("sprite.json").async("text"));
+                    const sprite_json_file = zip_goc.file("sprite.json");
+                    if (!sprite_json_file) {
+                        const t = uiTexts[currentLanguage];
+                        hien_thai_thai(t.status_error_sprite_invalid);
+                        alert(t.alert_sprite_invalid);
+                        return;
+                    }
+                    cau_truc_sprite = JSON.parse(await sprite_json_file.async("text"));
                     for (let ten_tep in zip_goc.files) {
                         if (ten_tep !== "sprite.json") zip_xuat.file(ten_tep, await zip_goc.files[ten_tep].async("blob"));
                     }
@@ -1549,9 +1594,10 @@
                     tongDungLuongEl.textContent = `${tongDungLuongKB} KB`;
                 }
                 
-                hien_thai_thai("Đã đóng gói xong font.sprite3!");
+                hien_thai_thai(uiTexts[currentLanguage].status_export_sprite);
             } catch (error) {
                 hien_thai_thai("Lỗi: " + error.message);
+                alert(error.message);
             }
         }
 
@@ -1591,9 +1637,10 @@
                 }
 
                 tai_xuong_tep(await zip_xuat.generateAsync({ type: "blob" }), "font.zip");
-                hien_thai_thai("Đã đóng gói font.zip chứa SVG!");
+                hien_thai_thai(uiTexts[currentLanguage].status_export_zip);
             } catch (error) {
                 hien_thai_thai("Lỗi: " + error.message);
+                alert(error.message);
             }
         }
 
@@ -1634,10 +1681,7 @@
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
-        // Khởi tạo UI khi tải trang.
-        window.addEventListener('DOMContentLoaded', function() {
-            cap_nhat_UI();
-        });
+
     </script>
 </body>
 
