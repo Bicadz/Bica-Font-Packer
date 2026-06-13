@@ -303,6 +303,59 @@
 
         const chuoi_base = "abcdefghijklmnopqrstuvwxyz!#$%\n\"&'()*+,-./0123456789:;<=>?@[\\\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+        // ===== SHARED UTILITIES =====
+
+        function lay_font_hoat_dong(hien_thi_loi = true) {
+            const ten_kieu_da_chon = lay_ten_font_da_chon();
+            const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
+            if (!font_hoat_dong && hien_thi_loi) {
+                const t = uiTexts[currentLanguage];
+                hien_thai_thai(t.status_no_font);
+            }
+            return font_hoat_dong || null;
+        }
+
+        function tao_svg_content(data) {
+            let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${data.do_rong_khung}" height="${data.chieu_cao_an_toan}" viewBox="0 0 ${data.do_rong_khung} ${data.chieu_cao_an_toan}">`;
+            if (data.logic_net_chu) {
+                svg += `<g transform="translate(${data.dich_x_g}, ${data.dich_y_g})">${data.logic_net_chu}</g>`;
+            }
+            svg += `</svg>`;
+            return svg;
+        }
+
+        function lay_mang_ky_tu_duy_nhat(chuoi) {
+            return [...new Set(chuoi.split(''))].filter(c => c !== '\r' && c !== '\n');
+        }
+
+        function cap_nhat_hien_thi_tong_ky_tu() {
+            const tongSoKyTu = document.getElementById('tong_so_ky_tu');
+            if (tongSoKyTu) {
+                tongSoKyTu.textContent = chuoi_ky_tu_hien_tai.length;
+            }
+        }
+
+        function hien_thi_tong_dung_luong(tong_bytes) {
+            const tongDungLuongKB = (tong_bytes / 1024).toFixed(2);
+            const tongDungLuongEl = document.getElementById('tong_dung_luong_svg');
+            if (tongDungLuongEl) {
+                tongDungLuongEl.textContent = `${tongDungLuongKB} KB`;
+            }
+        }
+
+        function tu_dong_chon_preset_chinese(ten_file) {
+            const ten_file_low = ten_file.toLowerCase();
+            if (ten_file_low.includes(' sc') || ten_file_low.includes(' tc') || ten_file_low.endsWith('sc') || ten_file_low.endsWith('tc')) {
+                const presetSelect = document.getElementById('preset_ngon_ngu');
+                if (presetSelect) {
+                    presetSelect.value = 'chinese';
+                    doi_preset_ngon_ngu();
+                }
+            }
+        }
+
+        // ===== END SHARED UTILITIES =====
+
         // Text song ngữ cho giao diện
         const uiTexts = {
             vi: {
@@ -569,12 +622,7 @@
                     vungView.textContent = t.status_no_font;
                 }
                 
-                // Cập nhật tổng số ký tự
-                const txt = document.getElementById('danh_sach_ky_tu');
-                const tongSoKyTu = document.getElementById('tong_so_ky_tu');
-                if (txt && tongSoKyTu) {
-                    tongSoKyTu.textContent = txt.value.length;
-                }
+                cap_nhat_hien_thi_tong_ky_tu();
             } catch (error) {
                 console.error("Error updating UI text:", error);
             }
@@ -623,11 +671,7 @@
                     txt.value = chuoi_ky_tu_hien_tai;
                 }
                 
-                // Cập nhật tổng số ký tự (dùng độ dài textarea)
-                const tongSoKyTu = document.getElementById('tong_so_ky_tu');
-                if (tongSoKyTu) {
-                    tongSoKyTu.textContent = txt.value.length;
-                }
+                cap_nhat_hien_thi_tong_ky_tu();
                 
                 // Bỏ xám bước 2 và ẩn status
                 if (step2Container) {
@@ -646,15 +690,8 @@
             if (txt) {
                 chuoi_ky_tu_hien_tai = txt.value;
                 kich_hoat_preview();
-                if (typeof window._cap_nhat_mau_chu === 'function') window._cap_nhat_mau_chu();
-                
-                // Cập nhật tổng số ký tự (dùng độ dài textarea)
-                const tongSoKyTu = document.getElementById('tong_so_ky_tu');
-                if (tongSoKyTu) {
-                    tongSoKyTu.textContent = txt.value.length;
-                }
-                
-                // Cập nhật tổng dung lượng SVG
+                cap_nhat_mau_chu();
+                cap_nhat_hien_thi_tong_ky_tu();
                 cap_nhat_tong_dung_luong_svg();
             }
         }
@@ -698,45 +735,30 @@
         }
 
         function cap_nhat_tong_dung_luong_svg() {
-            try {
-            const ten_kieu_da_chon = lay_ten_font_da_chon();
-            const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
+            const font_hoat_dong = lay_font_hoat_dong(false);
             if (!font_hoat_dong) return;
             
             const cau_hinh = lay_cau_hinh_hien_tai();
-            const mang_ky_tu_duy_nhat = [...new Set(chuoi_ky_tu_hien_tai.split(''))];
+            const mang_ky_tu = lay_mang_ky_tu_duy_nhat(chuoi_ky_tu_hien_tai);
             let tong_dung_luong_svg = 0;
             
-            for (let ky_tu of mang_ky_tu_duy_nhat) {
-                if (ky_tu === '\r' || ky_tu === '\n') continue;
-                
+            for (let ky_tu of mang_ky_tu) {
                 const glyph = font_hoat_dong.charToGlyph(ky_tu);
                 const data = tinh_toan_du_lieu_glyph(glyph, font_hoat_dong, cau_hinh);
-                
                 if (data.svgSize) {
                     tong_dung_luong_svg += data.svgSize;
                 }
             }
             
-            // Hiển thị tổng dung lượng SVG
-            const tongDungLuongKB = (tong_dung_luong_svg / 1024).toFixed(2);
-            const tongDungLuongEl = document.getElementById('tong_dung_luong_svg');
-            if (tongDungLuongEl) {
-                tongDungLuongEl.textContent = `${tongDungLuongKB} KB`;
-            }
-            } catch (e) {
-                console.error("Error in cap_nhat_tong_dung_luong_svg:", e);
-            }
+            hien_thi_tong_dung_luong(tong_dung_luong_svg);
         }
 
         function loc_ky_tu_tu_van_ban_mau() {
             const van_ban = document.getElementById('van_ban_goc_mau').value;
             if (!van_ban) return;
 
-            const chuoi_sach = van_ban.replace(/[\r\n\t]/g, '');
-            const mang_duy_nhat = [...new Set(chuoi_sach.split(''))];
-
-            chuoi_ky_tu_hien_tai = mang_duy_nhat.join('');
+            const chuoi_sach = van_ban.replace(/\t/g, '');
+            chuoi_ky_tu_hien_tai = lay_mang_ky_tu_duy_nhat(chuoi_sach).join('');
             dong_bo_textarea();
             kich_hoat_preview();
             
@@ -970,14 +992,7 @@
                         cap_nhat_tong_dung_luong_svg();
                         
                         // Kiểm tra nếu ZIP chứa font Chinese (SC/TC) thì tự chọn preset Chinese
-                        const ten_file_low = file.name.toLowerCase();
-                        if (ten_file_low.includes(' sc') || ten_file_low.includes(' tc') || ten_file_low.endsWith('sc') || ten_file_low.endsWith('tc')) {
-                            const presetSelect = document.getElementById('preset_ngon_ngu');
-                            if (presetSelect) {
-                                presetSelect.value = 'chinese';
-                                doi_preset_ngon_ngu();
-                            }
-                        }
+                        tu_dong_chon_preset_chinese(file.name);
                     } else {
                         hien_thai_thai("Lỗi: Không tìm thấy font tĩnh hợp lệ!");
                         alert("Không tìm thấy tệp font định dạng tĩnh nào hợp lệ bên trong file ZIP.");
@@ -1013,14 +1028,7 @@
                     hien_thai_thai(uiTexts[currentLanguage].status_load_success);
                     
                     // Kiểm tra nếu là font Chinese (SC/TC) thì tự chọn preset Chinese
-                    const ten_font_goc = file.name.toLowerCase();
-                    if (ten_font_goc.includes(' sc') || ten_font_goc.includes(' tc') || ten_font_goc.endsWith('sc') || ten_font_goc.endsWith('tc')) {
-                        const presetSelect = document.getElementById('preset_ngon_ngu');
-                        if (presetSelect) {
-                            presetSelect.value = 'chinese';
-                            doi_preset_ngon_ngu();
-                        }
-                    }
+                    tu_dong_chon_preset_chinese(file.name);
                 };
                 reader.onerror = function() {
                     const t = uiTexts[currentLanguage];
@@ -1206,11 +1214,7 @@
                             // Cập nhật lại màu sắc của tất cả các ô
                             cap_nhat_mau_chu();
                             
-                            // Cập nhật tổng số ký tự
-                            const tongSoKyTu = document.getElementById('tong_so_ky_tu');
-                            if (tongSoKyTu) {
-                                tongSoKyTu.textContent = chuoi_ky_tu_hien_tai.length;
-                            }
+                            cap_nhat_hien_thi_tong_ky_tu();
                             
                             // Cập nhật tổng dung lượng SVG
                             cap_nhat_tong_dung_luong_svg();
@@ -1441,13 +1445,8 @@
 
         function xuat_danh_sach_do_rong() {
             try {
-                const ten_kieu_da_chon = lay_ten_font_da_chon();
-                const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
-                if (!font_hoat_dong) {
-                    const t = uiTexts[currentLanguage];
-                    hien_thai_thai(t.status_no_font);
-                    return;
-                }
+                const font_hoat_dong = lay_font_hoat_dong();
+                if (!font_hoat_dong) return;
 
                 const size_chu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
                 const ti_le_scale = size_chu / font_hoat_dong.unitsPerEm;
@@ -1487,13 +1486,8 @@
 
         async function bat_dau_xu_ly_sprite() {
             try {
-                const ten_kieu_da_chon = lay_ten_font_da_chon();
-                const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
-                if (!font_hoat_dong) {
-                    const t = uiTexts[currentLanguage];
-                    hien_thai_thai(t.status_no_font);
-                    return;
-                }
+                const font_hoat_dong = lay_font_hoat_dong();
+                if (!font_hoat_dong) return;
 
                 const danh_sach_chu = chuoi_ky_tu_hien_tai;
                 const che_do_sua = document.querySelector('input[name="che_do"]:checked').value === 'modify';
@@ -1502,13 +1496,12 @@
 
                 let zip_xuat = new JSZip();
                 let du_lieu_costume = [];
-                let tong_dung_luong_svg = 0; // Tính tổng dung lượng SVG thực tế
-                const mang_ky_tu_duy_nhat = [...new Set(danh_sach_chu.split(''))];
+                let tong_dung_luong_svg = 0;
+                const mang_ky_tu_duy_nhat = lay_mang_ky_tu_duy_nhat(danh_sach_chu);
                 const tong_so_chu = mang_ky_tu_duy_nhat.length;
 
                 for (let i = 0; i < tong_so_chu; i++) {
                     let ky_tu = mang_ky_tu_duy_nhat[i];
-                    if (ky_tu === '\r' || ky_tu === '\n') continue;
 
                     // TỐI ƯU: Nhả thread cho trình duyệt thở sau mỗi 200 ký tự & Cập nhật UI
                     if (i > 0 && i % 200 === 0) {
@@ -1525,11 +1518,7 @@
                         tong_dung_luong_svg += data.svgSize;
                     }
 
-                    let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${data.do_rong_khung}" height="${data.chieu_cao_an_toan}" viewBox="0 0 ${data.do_rong_khung} ${data.chieu_cao_an_toan}">`;
-                    if (data.logic_net_chu) {
-                        svgContent += `<g transform="translate(${data.dich_x_g}, ${data.dich_y_g})">${data.logic_net_chu}</g>`;
-                    }
-                    svgContent += `</svg>`;
+                    const svgContent = tao_svg_content(data);
 
                     // Dùng MD5 hash làm tên file như mã cũ để Scratch import được
                     const md5_hash = SparkMD5.hash(svgContent);
@@ -1587,12 +1576,7 @@
                 zip_xuat.file("sprite.json", JSON.stringify(cau_truc_sprite));
                 tai_xuong_tep(await zip_xuat.generateAsync({ type: "blob" }), "font.sprite3");
                 
-                // Tính toán và hiển thị tổng dung lượng SVG thực tế
-                const tongDungLuongKB = (tong_dung_luong_svg / 1024).toFixed(2);
-                const tongDungLuongEl = document.getElementById('tong_dung_luong_svg');
-                if (tongDungLuongEl) {
-                    tongDungLuongEl.textContent = `${tongDungLuongKB} KB`;
-                }
+                hien_thi_tong_dung_luong(tong_dung_luong_svg);
                 
                 hien_thai_thai(uiTexts[currentLanguage].status_export_sprite);
             } catch (error) {
@@ -1603,29 +1587,23 @@
 
         async function bat_dau_xu_ly_zip_svg() {
             try {
-                const ten_kieu_da_chon = lay_ten_font_da_chon();
-                const font_hoat_dong = kho_font_da_tai[ten_kieu_da_chon];
-                if (!font_hoat_dong) {
-                    const t = uiTexts[currentLanguage];
-                    hien_thai_thai(t.status_no_font);
-                    return;
-                }
+                const font_hoat_dong = lay_font_hoat_dong();
+                if (!font_hoat_dong) return;
 
                 const danh_sach_chu = chuoi_ky_tu_hien_tai;
                 const cau_hinh = lay_cau_hinh_hien_tai();
                 let zip_xuat = new JSZip();
 
-                const mang_ky_tu_duy_nhat = [...new Set(danh_sach_chu.split(''))];
+                const mang_ky_tu_duy_nhat = lay_mang_ky_tu_duy_nhat(danh_sach_chu);
 
                 for (let i = 0; i < mang_ky_tu_duy_nhat.length; i++) {
                     let ky_tu = mang_ky_tu_duy_nhat[i];
-                    if (ky_tu === '\r' || ky_tu === '\n') continue;
 
                     const glyph = font_hoat_dong.charToGlyph(ky_tu);
                     const data = tinh_toan_du_lieu_glyph(glyph, font_hoat_dong, cau_hinh);
                     if (!data.valid) continue;
 
-                    const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${data.do_rong_khung}" height="${data.chieu_cao_an_toan}" viewBox="0 0 ${data.do_rong_khung} ${data.chieu_cao_an_toan}"><g transform="translate(${data.dich_x_g}, ${data.dich_y_g})">${data.logic_net_chu}</g></svg>`;
+                    const svgContent = tao_svg_content(data);
 
                     let folderName = "others";
                     if (ky_tu !== ky_tu.toUpperCase() && ky_tu === ky_tu.toLowerCase()) folderName = "lowercase";
