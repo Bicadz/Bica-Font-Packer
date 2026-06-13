@@ -412,6 +412,14 @@
                 alert_sprite_invalid: "File .sprite3 không hợp lệ (thiếu sprite.json).",
                 status_zip_font_errors: " font không thể đọc đã bị bỏ qua.",
                 status_updating_string: "Đang cập nhật chuỗi kí tự cuối cùng sẽ xuất bản",
+                status_sprite_selected: "Đã chọn file .sprite3: ",
+                status_error_variable_font: "Lỗi: Hệ thống hiện tại ưu tiên font tĩnh (Static)!",
+                alert_variable_font: "File này là font Variable. Để hiển thị chính xác nhất trên Scratch, vui lòng nạp font tĩnh lẻ hoặc file .zip chứa thư mục static nhé!",
+                status_error_no_static_font: "Lỗi: Không tìm thấy font tĩnh hợp lệ!",
+                alert_no_static_font: "Không tìm thấy tệp font định dạng tĩnh nào hợp lệ bên trong file ZIP.",
+                status_error_zip_read: "Lỗi đọc file ZIP: ",
+                status_error_generic: "Lỗi: ",
+                status_load_sprite_required: "Vui lòng nạp file .sprite3 cần sửa!",
                 preview_default: "Bica Font Packer",
                 preset: {
                     vietnamese: "Tiếng Việt",
@@ -495,6 +503,14 @@
                 alert_sprite_invalid: "The loaded .sprite3 file is invalid (missing sprite.json).",
                 status_zip_font_errors: " unreadable font(s) skipped.",
                 status_updating_string: "Updating final character string to publish",
+                status_sprite_selected: "Selected .sprite3 file: ",
+                status_error_variable_font: "Error: The system currently requires static fonts!",
+                alert_variable_font: "This file is a Variable font. For best display on Scratch, please load a static font or a .zip file containing a static folder.",
+                status_error_no_static_font: "Error: No valid static font found!",
+                alert_no_static_font: "No valid static font file found in the ZIP.",
+                status_error_zip_read: "Error reading ZIP file: ",
+                status_error_generic: "Error: ",
+                status_load_sprite_required: "Please load the .sprite3 file to modify!",
                 preview_default: "Bica Font Packer",
                 preset: {
                     vietnamese: "Vietnamese",
@@ -854,7 +870,7 @@
         document.getElementById('tep_sprite_goc').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                hien_thai_thai("Đã chọn file .sprite3: " + file.name);
+                hien_thai_thai(uiTexts[currentLanguage].status_sprite_selected + file.name);
             }
         });
 
@@ -928,8 +944,8 @@
             const ten_file_low = file.name.toLowerCase();
 
             if (!ten_file_low.endsWith('.zip') && (ten_file_low.includes('variable') || ten_file_low.includes('vf'))) {
-                hien_thai_thai("Lỗi: Hệ thống hiện tại ưu tiên font tĩnh (Static)!");
-                alert("File này là font Variable. Để hiển thị chính xác nhất trên Scratch, vui lòng nạp font tĩnh lẻ hoặc file .zip chứa thư mục static nhé!");
+                hien_thai_thai(uiTexts[currentLanguage].status_error_variable_font);
+                alert(uiTexts[currentLanguage].alert_variable_font);
                 return;
             }
 
@@ -994,12 +1010,12 @@
                         // Kiểm tra nếu ZIP chứa font Chinese (SC/TC) thì tự chọn preset Chinese
                         tu_dong_chon_preset_chinese(file.name);
                     } else {
-                        hien_thai_thai("Lỗi: Không tìm thấy font tĩnh hợp lệ!");
-                        alert("Không tìm thấy tệp font định dạng tĩnh nào hợp lệ bên trong file ZIP.");
+                        hien_thai_thai(uiTexts[currentLanguage].status_error_no_static_font);
+                        alert(uiTexts[currentLanguage].alert_no_static_font);
                     }
                 } catch (zipErr) {
-                    hien_thai_thai("Lỗi đọc file ZIP: " + zipErr.message);
-                    alert("Lỗi đọc file ZIP: " + zipErr.message);
+                    hien_thai_thai(uiTexts[currentLanguage].status_error_zip_read + zipErr.message);
+                    alert(uiTexts[currentLanguage].status_error_zip_read + zipErr.message);
                 }
             } else {
                 const reader = new FileReader();
@@ -1073,6 +1089,7 @@
                     </label>`;
                 }
                 listDiv.innerHTML = html;
+
                 container.appendChild(listDiv);
                 container.style.display = 'block';
 
@@ -1360,7 +1377,6 @@
         }
 
         function kich_hoat_preview() {
-            const t = uiTexts[currentLanguage];
             try {
             // Cập nhật max value và label cho input độ dày viền theo kích thước chữ
             const sizeChu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
@@ -1474,7 +1490,7 @@
                 document.getElementById('vung_ket_qua_text').style.display = 'block';
                 hien_thai_thai(uiTexts[currentLanguage].status_export_width);
             } catch (error) {
-                hien_thai_thai("Lỗi: " + error.message);
+                hien_thai_thai(uiTexts[currentLanguage].status_error_generic + error.message);
                 alert(error.message);
             }
         }
@@ -1554,7 +1570,7 @@
                     const tep_goc = document.getElementById('tep_sprite_goc').files[0];
                     if (!tep_goc) {
                         const t = uiTexts[currentLanguage];
-                        hien_thai_thai("Vui lòng nạp file .sprite3 cần sửa!");
+                        hien_thai_thai(uiTexts[currentLanguage].status_load_sprite_required);
                         return;
                     }
                     const zip_goc = await JSZip.loadAsync(tep_goc);
@@ -1581,7 +1597,7 @@
                 
                 hien_thai_thai(uiTexts[currentLanguage].status_export_sprite);
             } catch (error) {
-                hien_thai_thai("Lỗi: " + error.message);
+                hien_thai_thai(uiTexts[currentLanguage].status_error_generic + error.message);
                 alert(error.message);
             }
         }
@@ -1618,7 +1634,7 @@
                 tai_xuong_tep(await zip_xuat.generateAsync({ type: "blob" }), "font.zip");
                 hien_thai_thai(uiTexts[currentLanguage].status_export_zip);
             } catch (error) {
-                hien_thai_thai("Lỗi: " + error.message);
+                hien_thai_thai(uiTexts[currentLanguage].status_error_generic + error.message);
                 alert(error.message);
             }
         }
