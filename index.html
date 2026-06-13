@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-16">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bica Font Packer</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js" integrity="sha384-3TaxGqyHrMuRIWY5Z5WHNIzgNRqGIUJE+mk6tm+g1wkm9Ux2kUyOLfy9AsNWXA6u" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js" integrity="sha384-WAahC3S+69Co45zyyuhCjvdMwo7a42Yn0mM0IgZIUlYNebG24AVkPUltj3BQnM85" crossorigin="anonymous"></script>
     <style>
         body{font-family: 'Segoe UI', sans-serif;background:#18181c;color:#f5f5f7;margin:0;padding:20px;}
         .container{max-width:950px;margin:0 auto;background:#22222b;padding:25px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
@@ -291,6 +291,16 @@
         let chuoi_ky_tu_hien_tai = "";
         let timer_dong_bo_textarea = null;
 
+        function thoat_html(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        function kiem_tra_mau_hop_le(value) {
+            return /^#([0-9A-Fa-f]{3}){1,2}$/.test(value) || value.toLowerCase() === 'none';
+        }
+
         const chuoi_base = "abcdefghijklmnopqrstuvwxyz!#$%\n\"&'()*+,-./0123456789:;<=>?@[\\\]^_`{|}~ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
         // Text song ngữ cho giao diện
@@ -529,7 +539,7 @@
                     const maxVal = maxDisplay ? maxDisplay.textContent : '8';
                     const doDayVienLabel = document.getElementById('step3_stroke_width_label');
                     if (doDayVienLabel) {
-                        doDayVienLabel.innerHTML = t.step3_stroke_width + `<span id="max_stroke_display">${maxVal}</span>):`;
+                        doDayVienLabel.innerHTML = thoat_html(t.step3_stroke_width) + `<span id="max_stroke_display">${thoat_html(maxVal)}</span>):`;
                     }
                 }
 
@@ -959,7 +969,7 @@
                         style_preview.id = 'id_font_preview_style';
                         document.head.appendChild(style_preview);
                     }
-                    style_preview.innerHTML = `@font-face { font-family: 'DynamicBicaFont'; src: url('${url_font_preview}'); }`;
+                    style_preview.textContent = `@font-face { font-family: 'DynamicBicaFont'; src: url('${url_font_preview}'); }`;
 
                     cap_nhat_va_dung_giao_dien(true);
                     hien_thai_thai("Nạp font thành công!");
@@ -990,20 +1000,40 @@
             }
 
             if (tai_lai_danh_sach) {
-                let html = `<label style="font-weight:bold; color:#aaa; display:block; margin-bottom:5px;">${t.step1_font_label}</label>`;
-                html += `<div style="background:#1a1a22; border:1px solid #444; border-radius:6px; max-height:200px; overflow-y:auto; padding:5px;">`;
+                container.innerHTML = '';
+
+                const titleLabel = document.createElement('label');
+                titleLabel.style.cssText = 'font-weight:bold; color:#aaa; display:block; margin-bottom:5px;';
+                titleLabel.textContent = t.step1_font_label;
+                container.appendChild(titleLabel);
+
+                const listDiv = document.createElement('div');
+                listDiv.style.cssText = 'background:#1a1a22; border:1px solid #444; border-radius:6px; max-height:200px; overflow-y:auto; padding:5px;';
 
                 for (let ten in kho_font_da_tai) {
                     const font = kho_font_da_tai[ten];
                     const safeName = font._safeName || "sans-serif";
-                    html += `
-                    <label style="display:flex; align-items:center; padding:8px; cursor:pointer; border-bottom:1px solid #333;">
-                        <input type="radio" name="font_choice" value="${ten}" onchange="cap_nhat_va_dung_giao_dien(false)" style="margin-right:10px; transform:scale(1.2);">
-                        <span style="font-family:'${safeName}', sans-serif; font-size:16px; color:#fff;">Hamburgevons - ${ten}</span>
-                    </label>`;
+
+                    const label = document.createElement('label');
+                    label.style.cssText = 'display:flex; align-items:center; padding:8px; cursor:pointer; border-bottom:1px solid #333;';
+
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = 'font_choice';
+                    radio.value = ten;
+                    radio.style.cssText = 'margin-right:10px; transform:scale(1.2);';
+                    radio.addEventListener('change', () => cap_nhat_va_dung_giao_dien(false));
+
+                    const span = document.createElement('span');
+                    span.style.cssText = `font-family:'${safeName}', sans-serif; font-size:16px; color:#fff;`;
+                    span.textContent = 'Hamburgevons - ' + ten;
+
+                    label.appendChild(radio);
+                    label.appendChild(span);
+                    listDiv.appendChild(label);
                 }
-                html += `</div>`;
-                container.innerHTML = html;
+
+                container.appendChild(listDiv);
                 container.style.display = 'block';
 
                 const firstRadio = container.querySelector('input[type="radio"]');
@@ -1095,8 +1125,8 @@
                 const charItems = document.querySelectorAll('.char-item');
                 
                 charItems.forEach(item => {
-                    const char = item.innerHTML;
-                    if (char && char !== '&nbsp;') {
+                    const char = item.textContent;
+                    if (char && char.trim()) {
                         if (chuoi_ky_tu_hien_tai.includes(char)) {
                             item.classList.add('char-disabled');
                         } else {
@@ -1120,7 +1150,11 @@
                     const ky_tu = danh_sach_ky_tu_map[i] || ''; 
                     const o_chu = document.createElement('div');
                     o_chu.className = 'char-item';
-                    o_chu.innerHTML = ky_tu || '&nbsp;';
+                    if (ky_tu) {
+                        o_chu.textContent = ky_tu;
+                    } else {
+                        o_chu.innerHTML = '&nbsp;';
+                    }
 
                     if (ky_tu) {
                         o_chu.onclick = () => {
@@ -1271,13 +1305,14 @@
         function lay_cau_hinh_hien_tai() {
             // Nếu checkbox tắt -> Ép biến màu viền thành 'none' để logic tự ngắt viền
             const checkbox = document.getElementById('co_vien_checkbox');
-            const mau_vien_thuc_te = (checkbox && checkbox.checked) 
+            const raw_mau_chu = document.getElementById('mau_chu').value.trim();
+            const raw_mau_vien = (checkbox && checkbox.checked) 
                 ? document.getElementById('mau_vien').value.trim() 
                 : 'none';
             return {
                 size_chu: Math.min(Math.max(parseInt(document.getElementById('kich_thuoc_chu').value) || 64, 4), 512),
-                mau_chu: document.getElementById('mau_chu').value.trim(),
-                mau_vien: mau_vien_thuc_te, // Đã cập nhật
+                mau_chu: kiem_tra_mau_hop_le(raw_mau_chu) ? raw_mau_chu : '#ffffff',
+                mau_vien: kiem_tra_mau_hop_le(raw_mau_vien) ? raw_mau_vien : 'none',
                 do_day_vien: Math.min(Math.max(parseFloat(document.getElementById('do_day_vien').value) || 0, 0), 100),
                 ti_le_width: Math.min(Math.max(parseFloat(document.getElementById('ti_le_width').value) || 100, 30), 300) / 100,
                 loai_can_tam: (() => {
