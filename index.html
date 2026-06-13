@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-16">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bica Font Packer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
@@ -24,7 +24,7 @@
         input[type="color"]{width:45px;height:38px;border:1px solid #444;background:none;border-radius:6px;cursor:pointer;padding:0;}
         .radio-group{background:#1a1a22;padding:12px;border-radius:6px;margin-top:8px;}
         .radio-item{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-        .adio-item:last-child{margin-bottom:0;}
+        .radio-item:last-child{margin-bottom:0;}
         .radio-item input {width:18px;height:18px;cursor:pointer;}
         button{background:#ff4757;color:white;border:none;padding:12px 20px;font-weight:bold;border-radius:6px;cursor:pointer;width:100%;margin-top:12px;font-size:15px;transition:0.2s;}
         button:hover{background:#ff6b81;}
@@ -624,7 +624,7 @@
             if (txt) {
                 chuoi_ky_tu_hien_tai = txt.value;
                 kich_hoat_preview();
-                cap_nhat_mau_chu();
+                if (typeof window._cap_nhat_mau_chu === 'function') window._cap_nhat_mau_chu();
                 
                 // Cập nhật tổng số ký tự (dùng độ dài textarea)
                 const tongSoKyTu = document.getElementById('tong_so_ky_tu');
@@ -860,8 +860,15 @@
             const file = e.target.files[0];
             if (!file) return;
 
+            // Revoke old blob URLs before clearing font store to prevent memory leaks
+            for (let ten in kho_font_da_tai) {
+                const oldFont = kho_font_da_tai[ten];
+                if (oldFont._blobUrl) URL.revokeObjectURL(oldFont._blobUrl);
+                const oldStyle = document.getElementById('style_' + (oldFont._safeName || ''));
+                if (oldStyle) oldStyle.remove();
+            }
             kho_font_da_tai = {};
-            hien_thai_thai("Đang xử lý cấu trúc nhị phân Font...");
+            hien_thai_thai(uiTexts[currentLanguage].status_load_font);
 
             const ten_file_low = file.name.toLowerCase();
 
@@ -962,7 +969,7 @@
                     style_preview.innerHTML = `@font-face { font-family: 'DynamicBicaFont'; src: url('${url_font_preview}'); }`;
 
                     cap_nhat_va_dung_giao_dien(true);
-                    hien_thai_thai("Nạp font thành công!");
+                    hien_thai_thai(uiTexts[currentLanguage].status_load_success);
                     
                     // Kiểm tra nếu là font Chinese (SC/TC) thì tự chọn preset Chinese
                     const ten_font_goc = file.name.toLowerCase();
@@ -996,10 +1003,11 @@
                 for (let ten in kho_font_da_tai) {
                     const font = kho_font_da_tai[ten];
                     const safeName = font._safeName || "sans-serif";
+                    const escapedTen = ten.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
                     html += `
                     <label style="display:flex; align-items:center; padding:8px; cursor:pointer; border-bottom:1px solid #333;">
-                        <input type="radio" name="font_choice" value="${ten}" onchange="cap_nhat_va_dung_giao_dien(false)" style="margin-right:10px; transform:scale(1.2);">
-                        <span style="font-family:'${safeName}', sans-serif; font-size:16px; color:#fff;">Hamburgevons - ${ten}</span>
+                        <input type="radio" name="font_choice" value="${escapedTen}" onchange="cap_nhat_va_dung_giao_dien(false)" style="margin-right:10px; transform:scale(1.2);">
+                        <span style="font-family:'${safeName}', sans-serif; font-size:16px; color:#fff;">Hamburgevons - ${escapedTen}</span>
                     </label>`;
                 }
                 html += `</div>`;
@@ -1090,7 +1098,7 @@
                 }
             }
 
-            // 4. HÀM CON: CẬP NHẬT MÀU SẮC CÁC Ô KÝ TỰ
+            // 4. HÀM CON: CẬP NHẬT MÀU SẮC CÁC Ô KÝ TỰ (exposed globally as window._cap_nhat_mau_chu)
             function cap_nhat_mau_chu() {
                 const charItems = document.querySelectorAll('.char-item');
                 
@@ -1105,6 +1113,7 @@
                     }
                 });
             }
+            window._cap_nhat_mau_chu = cap_nhat_mau_chu;
 
             // 5. HÀM CON: VẼ HÌNH ẢNH CÁC Ô KÝ TỰ
             function render_page_ky_tu() {
@@ -1301,12 +1310,12 @@
             }
 
             const vung_view = document.getElementById('vung_hien_thi_preview');
+            const t = uiTexts[currentLanguage];
             const chuoi_test = document.getElementById('chuoi_preview').value || t.preview_default;
             const ten_font = lay_ten_font_da_chon();
             const font = kho_font_da_tai[ten_font] || window.font_hien_tai;
 
             if (!font) {
-                const t = uiTexts[currentLanguage];
                 vung_view.textContent = t.status_no_font;
                 vung_view.style.fontSize = "16px";
                 vung_view.style.color = "#aaa";
@@ -1379,7 +1388,7 @@
 
                 const size_chu = parseInt(document.getElementById('kich_thuoc_chu').value) || 64;
                 const ti_le_scale = size_chu / font_hoat_dong.unitsPerEm;
-                const ti_le_width = parseFloat(document.getElementById('ti_le_width').value) || 1.0;
+                const ti_le_width = (Math.min(Math.max(parseFloat(document.getElementById('ti_le_width').value) || 100, 30), 300)) / 100;
                 const do_day_vien = parseFloat(document.getElementById('do_day_vien').value) || 0;
                 const phan_dem_vien = do_day_vien;
 
@@ -1400,7 +1409,7 @@
 
                 document.getElementById('ket_qua_do_rong').value = mang_ket_qua.join('\n');
                 document.getElementById('vung_ket_qua_text').style.display = 'block';
-                hien_thai_thai("Đã kết xuất ma trận độ rộng tương ứng!");
+                hien_thai_thai(uiTexts[currentLanguage].status_export_width);
             } catch (error) {
                 alert("Lỗi: " + error.message);
             }
@@ -1514,7 +1523,7 @@
                     tongDungLuongEl.textContent = `${tongDungLuongKB} KB`;
                 }
                 
-                hien_thai_thai("Đã đóng gói xong font.sprite3!");
+                hien_thai_thai(uiTexts[currentLanguage].status_export_sprite);
             } catch (error) {
                 hien_thai_thai("Lỗi: " + error.message);
             }
@@ -1556,7 +1565,7 @@
                 }
 
                 tai_xuong_tep(await zip_xuat.generateAsync({ type: "blob" }), "font.zip");
-                hien_thai_thai("Đã đóng gói font.zip chứa SVG!");
+                hien_thai_thai(uiTexts[currentLanguage].status_export_zip);
             } catch (error) {
                 hien_thai_thai("Lỗi: " + error.message);
             }
@@ -1599,10 +1608,7 @@
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
-        // Khởi tạo UI khi tải trang.
-        window.addEventListener('DOMContentLoaded', function() {
-            cap_nhat_UI();
-        });
+
     </script>
 </body>
 
